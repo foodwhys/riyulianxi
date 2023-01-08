@@ -1268,3 +1268,98 @@ ico图标设置
 3. 文本内容属性 color,font,text-decoration,text-align,line-height
 4. 点缀属性 cursor,border-radius,text-shadow,box-shadow
 
+-------------------
+项目练习
+-------------------
+
+css精灵
+-------------------
+<style>
+span {
+	display: inline-block;
+	width: 18px;
+	height: 24px;
+	background-color: pink;
+	background-image: url(./images/taobao.png);
+	/* 背景图位置属性: 改变背景图的位置 */
+	/* 水平方向位置  垂直方向的位置 */
+	/* 想要向左侧移动图片, 位置取负数;  */
+	background-position: -3px 0;
+}
+
+b {
+	display: block;
+	width: 25px;
+	height: 21px;
+	background-color: green;
+	background-image: url(./images/taobao.png);
+	background-position: 0 -90px;
+}
+</style>
+
+<!-- <img src="./images/taobao.png" alt=""> -->
+<!-- 精灵图的标签都用行内标签  span, b, i -->
+<span></span>
+<b></b>
+
+背景图缩放
+-------------------
+<style>
+.box {
+	width: 400px;
+	height:300px;
+	background-color: pink;
+	background-image: url(./images/1.jpg);
+	background-repeat: no-repeat;
+	/* background-size: 300px; */
+	/* background-size: 50%; */
+
+	/* 如果图的宽或高与盒子的尺寸相同了, 另一个方向停止缩放 -- 导致盒子可能有留白 */
+	background-size: contain;
+	/* 保证宽或高和盒子尺寸完全相同 , 导致图片显示不全 */
+	/* background-size: cover; */
+
+	/* 工作中, 图的比例和盒子的比例都是相同的, contain 和cover效果完全相同; */
+}
+</style>
+
+<div class="box"></div>
+
+盒子阴影
+-------------------
+<style>
+.box {
+	width: 200px;
+	height: 200px;
+	background-color: pink;
+
+	box-shadow: 5px 10px 20px 10px green inset;
+
+	/* 注意: 外阴影, 不能添加outset, 添加了会导致属性报错 */
+	/* box-shadow: 5px 10px 20px 10px green outset; */
+}
+</style>
+
+<div class="box"></div>
+
+过渡
+-------------------
+<style>
+/* 过渡配合hover使用, 谁变化谁加过渡属性 */
+.box {
+	width: 200px;
+	height: 200px;
+	background-color: pink;
+	/* 宽度200, 悬停的时候宽度600, 花费1秒钟 */
+	/* transition: width 1s, background-color 2s; */
+
+	/* 如果变化的属性多, 直接写all,表示所有 */
+	transition: all 1s;
+}
+
+.box:hover {
+	width: 600px;
+	background-color: red;
+}
+</style>
+<div class="box"></div>
