@@ -5,3 +5,91 @@
 	业务层要用数据层的类对象，以前是自己new的
 	现在自己不new了，靠别人[外部其实指的就是IOC容器]来给注入进来
 	这种思想就是依赖注入
+	
+IOC容器中哪些bean之间要建立依赖关系
+----------
+根据业务需求提前建立好关系，如业务层需要依赖数据层，service就要和dao建
+立依赖关系
+
+什么是IOC/DI思想
+----------
+IOC:控制反转，控制反转的是对象的创建权
+DI:依赖注入，绑定对象与对象之间的依赖关系
+
+什么是IOC容器
+----------
+pring创建了一个容器用来存放所创建的对象，这个容器就叫IOC容器
+
+什么是Bean
+----------
+容器中所存放的一个个对象就叫Bean或Bean对象
+
+
+bean作用范围scope配置（重点）
+----------
+singleton：单例（默认）
+prototype：非单例
+
+bean基础配置小结
+----------
+<bean
+	id="bean的唯一标识"
+	class="bean的类全名"
+	scope="bean的作用范围，singleton(默认)和prototype"
+	name="为bean取别的名"
+	factory- method="具体工厂类中创建对象的方法名"
+>
+<property 
+	name="表示配置哪一个具体的属性" 
+	ref="表示参照哪一个bean"/>
+</bean>
+
+分析Spring的错误信息
+----------
+Caused by 翻译为引起，即出现错误的原因
+java.lang.NoSuchMethodException:抛出的异常为没有这样的方法异常
+com.itheima.dao.impl.BookDaoImpl. <init> ():哪个类的哪个方法没有被找到导致的
+异常，<init> ()指定是类的构造方法，即该类的无参构造方法
+nested:嵌套的意思，后面的异常内容和最底层的异常是一致的
+BeanInstantiationException:翻译为bean实例化异常
+No default constructor found:没有一个默认的构造函数被发现
+
+Spring的IOC实例化对象的三种方式分别是
+----------
+构造方法(常用)
+静态工厂(了解)
+实例工厂(了解)
+
+bean的生命周期
+----------
+创建到销毁的整体过程
+init-method="bean初始化对应的操作方法名"
+destroy-method="bean销毁前对应的操作方法名"
+
+bean生命周期小结
+----------
+(1)关于Spring中对bean生命周期控制提供了两种方式:
+	在配置文件中的bean标签中添加init-method和destroy-method属性
+	类实现InitializingBean与DisposableBean接口，这种方式了解下即可。
+(2)对于bean的生命周期控制在bean的整个生命周期中所处的位置如下:
+	初始化容器
+	1.创建对象(内存分配)
+	2.执行构造方法
+	3.执行属性注入(set操作)
+	4.执行bean初始化方法
+使用bean
+	1.执行业务操作
+		关闭/销毁容器
+	1.执行bean销毁方法
+	(3)关闭容器的两种方式:
+		ConfigurableApplicationContext是ApplicationContext的子类
+		close()方法
+		registerShutdownHook()方法
+		
+DI相关内容
+----------
+
+向一个类中传递数据的方式有几种
+----------
+普通方法(set方法)
+构造方法
