@@ -93,3 +93,14 @@ DI相关内容
 ----------
 普通方法(set方法)
 构造方法
+
+spring启动配置
+----------
+public class App {
+	public static void main(String[] args) throws Exception{ 
+		ApplicationContext ctx = 
+		new ClassPathXmlApplicationContext("applicationContext.xml");
+		BookDao bookDao = (BookDao) ctx.getBean("bookDao"); 
+		bookDao.save(); 
+	}
+}
