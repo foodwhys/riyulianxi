@@ -38,6 +38,34 @@ bean基础配置小结
 	scope="bean的作用范围，singleton(默认)和prototype"
 	name="为bean取别的名"
 	factory- method="具体工厂类中创建对象的方法名"
+	factory-bean="实列工厂bean"
+	init-method="生命周期初始化方法"
+	destroy-method="生命周期销毁方法"
+	autowire="自动配置类型 byType"
+	lazy-init="控制bean延迟加载 true/false"
+	<!-- 依赖注入相关 -->
+	
+	<!-- 构造器注入，一般用在第三方技术整合 -->
+	<constructor-arg name="bookDao" ref="bookDao"/> // 构造器注入引用类型
+	<constructor-arg name="userDao" ref="userDao"/> 
+	<constructor-arg name="msg" ref="WARN"/> // 构造器注入简单类型
+	<constructor-arg type="java.lang.String" index="3" value="warn"/> // 类型与索引匹配
+	<!-- 构造器注入，一般用在第三方技术整合 -->
+	
+	<!-- setter注入，对于我们写的类，这种方式用的相对比较多 -->
+	<property name="bookDao" ref="bookDao"/>
+	<property name="bookDao" ref="bookDao"/>
+	<property name="msg" valu="WARN"/>
+	
+	<property name="names">
+		<list>
+			<valu>aaa</valu\>
+			<ref> bean"dataSource"/>
+		</list>
+	</property>
+	<!-- setter注入，对于我们写的类，这种方式用的相对比较多 -->
+	
+	<!-- 依赖注入相关 -->
 >
 <property 
 	name="表示配置哪一个具体的属性" 
@@ -104,3 +132,385 @@ public class App {
 		bookDao.save(); 
 	}
 }
+
+容器创建的两种方式
+	ClassPathXmlApplicationContext[掌握]
+	FileSystemXmlApplicationContext[知道即可]
+获取Bean的三种方式
+	getBean("名称"):需要类型转换
+	getBean("名称",类型.class):多了一个参数
+	getBean(类型.class):容器中不能有多个该类的bean对象
+上述三种方式，各有各的优缺点，用哪个都可以。
+容器类层次结构
+	只需要知晓容器的最上级的父接口为 BeanFactory即可
+BeanFactory
+	使用BeanFactory创建的容器是延迟加载
+	使用ApplicationContext创建的容器是立即加载
+	具体BeanFactory如何创建只需要了解即可。
+BeanFactory是延迟加载，只有在获取bean对象的时候才会去创建
+	ApplicationContext是立即加载，容器加载的时候就会创建bean对象
+	ApplicationContext要想成为延迟加载，只需要按照如下方式进行配置
+
+<bean id="bookDao" class="com.itheima.dao.impl.BookDaoImpl" lazy- init="true"/>
+
+核心容器总结
+----------
+BeanFactory是IoC容器的顶层接口，初始化BeanFactory对象时，加载的bean延迟加载
+ApplicationContext接口是Spring容器的核心接口，初始化时bean立即加载
+ApplicationContext接口提供基础的bean操作相关方法，通过其他接口扩展其功能
+
+ApplicationContext接口常用初始化类
+	ClassPathXmlApplicationContext(常用)
+	FileSystemXmlApplicationContext
+	
+IOC/DI注解开发
+----------
+<context:component-scan base-package="com.itheima"/>
+component:组件,Spring将管理的bean视作自己的一个组件
+scan:扫描
+
+@Component:
+注解如果不起名称，
+会有一个默认值就是当前类名首字母小写，
+所以也可以按照名称获取
+
+@Component/@Controller/@Service/@Repository
+类定义上方
+设置该类为spring管理的bean
+
+@Configuration
+----------
+类定义上方
+设置该类为spring配置类
+
+@ComponentScan
+----------
+类定义上方
+设置spring配置类扫描路径，用于加载使用注解格式定义的bean
+
+ClassPathXmlApplicationContext是加载XML配置文件
+AnnotationConfigApplicationContext是加载配置类
+
+ApplicationContext ctx = 
+new AnnotationConfigApplicationContext(SpringConfig.class); 
+BookDao bookDao = (BookDao) ctx.getBean("bookDao"); 
+System.out.println(bookDao); BookService bookService = ctx.getBean(BookService.class); System.out.println(bookService);
+
+@Scope
+----------
+类定义上方
+设置该类创建对象的作用范围
+可用于设置创建出的bean是否为单例对象
+默认值singleton（单例），可选值prototype（非单例）
+
+@PostConstruct
+----------
+方法上
+设置该方法为初始化方法
+
+@PreDestroy
+----------
+方法上
+设置该方法为销毁方法
+
+注解开发依赖注入
+----------
+
+@Autowired
+----------
+属性注解 或 方法注解（了解） 或 方法形参注解（了解）
+属性定义上方 或 标准set方法上方 或 类set方法上方 或 方法形参前面
+
+@Autowired可以写在属性上，
+也可也写在setter方法上，
+最简单的处理方式是写在属性上并将 setter方法删除掉
+
+自动装配基于反射设计创建对象并通过暴力反射为私有属性进行设值
+普通反射只能获取public修饰的内容
+暴力反射除了获取public修饰的内容还可以获取private修改的内容
+所以此处无需提供setter方法
+
+@Autowired是按照类型注入，
+那么对应BookDao接口如果有多个实现类，
+比如添加BookDaoImpl2
+
+
+@Qualifier
+----------
+属性定义上方 或 标准set方法上方 或 类set方法上方
+为引用类型属性指定注入的beanId
+
+@Value
+----------
+属性定义上方 或 标准set方法上方 或 类set方法上方
+
+为 基本数据类型 或 字符串类型 属性设置值
+@Value("${name}")
+
+@PropertySource
+----------
+类定义上方
+加载properties文件中的属性值
+
+如果读取的properties配置文件有多个，可以使用@PropertySource的属性来指定多个
+ @PropertySource({"jdbc.properties","xxx.properties"})
+ 
+注解属性中不支持使用通配符* ,运行会报错
+ @PropertySource({"*.properties"})
+ 
+注解属性中可以把classpath:加上,代表从当前项目的根路径找文件
+@PropertySource({"classpath:jdbc.properties"})
+
+IOC/DI注解开发管理第三方bean
+----------
+
+步骤1:导入对应的jar包
+<dependency> 
+	<groupId>com.alibaba</groupId> 
+	<artifactId>druid</artifactId> 
+	<version>1.1.16</version> 
+</dependency>
+
+步骤2:在配置类中添加一个方法
+注意该方法的返回值就是要创建的Bean对象类型
+
+@Configuration 
+public class SpringConfig { 
+
+	public DataSource dataSource(){ 
+		DruidDataSource ds = new DruidDataSource(); 
+		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
+		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
+		ds.setUsername("root"); 
+		ds.setPassword("root"); 
+		return ds; 
+	}
+}
+
+步骤3:在方法上添加@Bean注解
+@Configuration 
+public class SpringConfig { 
+	@Bean
+	public DataSource dataSource(){ 
+		DruidDataSource ds = new DruidDataSource();
+		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
+		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
+		ds.setUsername("root"); 
+		ds.setPassword("root"); 
+		return ds; 
+	}
+}
+
+注意:不能使用DataSource ds = new DruidDataSource()
+因为DataSource接口中没有对应的setter方法来设置属性。
+
+步骤4:从IOC容器中获取对象并打印
+
+public class App { 
+
+	public static void main(String[] args) { 
+		AnnotationConfigApplicationContext ctx = 
+		new AnnotationConfigApplicationContext(SpringConfig.class);
+		DataSource dataSource = ctx.getBean(DataSource.class); 
+		System.out.println(dataSource); 
+	}
+}
+
+引入外部配置类
+----------
+
+使用包扫描引入
+----------
+步骤1:在Spring的配置类上添加包扫描
+
+@Configuration 
+@ComponentScan("com.itheima.config") 
+public class SpringConfig { }
+
+步骤2:在JdbcConfig上添加配置注解
+JdbcConfig类要放入到com.itheima.config包下，需要被Spring的配置类扫描到即可
+
+@Configuration 
+public class JdbcConfig { 
+	@Bean public DataSource dataSource(){ 
+		DruidDataSource ds = new DruidDataSource(); 
+		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
+		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
+		ds.setUsername("root"); 
+		ds.setPassword("root"); 
+		return ds; 
+	} 
+}
+
+步骤3:运行程序
+
+这种方式虽然能够扫描到，但是不能很快的知晓都引入了哪些配置类，所有这种方式不推荐使用
+
+使用@Import引入
+----------
+
+步骤1:去除JdbcConfig类上的注解
+
+public class JdbcConfig { 
+	@Bean public DataSource dataSource(){ 
+		DruidDataSource ds = new DruidDataSource(); 
+		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
+		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
+		ds.setUsername("root"); 
+		ds.setPassword("root"); 
+		return ds; 
+	} 
+}
+
+
+步骤2:在Spring配置类中引入
+
+@Configuration 
+//@ComponentScan("com.itheima.config") 
+@Import({JdbcConfig.class}) 
+public class SpringConfig { }
+
+注意:
+扫描注解可以移除
+@Import参数需要的是一个数组，可以引入多个配置类。
+@Import注解在配置类中只能写一次，下面的方式是不允许的
+
+@Configuration 
+//@ComponentScan("com.itheima.config") 
+@Import(JdbcConfig.class) 
+@Import(Xxx.class) 
+public class SpringConfig { }
+
+
+@Bean
+----------
+类定义上方
+导入配置类
+
+注解开发实现为第三方bean注入资源
+----------
+
+步骤1:类中提供四个属性
+
+
+public class JdbcConfig { 
+
+	private String driver; 
+	private String url; 
+	private String userName; 
+	private String password;
+
+	@Bean 
+	public DataSource dataSource(){ 
+		DruidDataSource ds = new DruidDataSource(); 
+		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
+		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
+		ds.setUsername("root"); 
+		ds.setPassword("root"); 
+		return ds; 
+	} 
+}
+
+步骤2:使用@Value注解引入值
+
+public class JdbcConfig { 
+	@Value("com.mysql.jdbc.Driver") 
+	private String driver; 
+	@Value("jdbc:mysql://localhost:3306/spring_db") 
+	private String url; 
+	@Value("root") private 
+	String userName; 
+	@Value("password") private 
+	String password;
+
+	@Bean 
+	public DataSource dataSource(){ 
+		DruidDataSource ds = new DruidDataSource(); 
+		ds.setDriverClassName(driver); 
+		ds.setUrl(url); 
+		ds.setUsername(userName); 
+		ds.setPassword(password); 
+		return ds; 
+	} 
+}
+
+
+引用数据类型
+----------
+假设在构建DataSource对象的时候，需要用到BookDao对象
+该如何把BookDao对象注入进方法内让其使用呢?
+
+注入引用数据类型步骤
+----------
+步骤1:在SpringConfig中扫描BookDao
+扫描的目的是让Spring能管理到BookDao,也就是说要让IOC容器中有一个bookDao对象
+
+@Configuration 
+@ComponentScan("com.itheima.dao") 
+@Import({JdbcConfig.class}) 
+public class SpringConfig { }
+
+步骤2:在JdbcConfig类的方法上添加参数
+
+@Bean 
+public DataSource dataSource(BookDao bookDao){ 
+	System.out.println(bookDao); 
+	DruidDataSource ds = new DruidDataSource(); 
+	ds.setDriverClassName(driver); 
+	ds.setUrl(url); 
+	ds.setUsername(userName); 
+	ds.setPassword(password); 
+	return ds; 
+}
+引用类型注入只需要为bean定义方法设置形参即可，容器会根据类型自动装配对象。
+
+注解开发总结
+----------
+
+定义bean
+----------
+XML:
+ bean标签
+注解：
+ @Controller
+ @Service
+ @Repository
+ @Component 
+
+设置依赖注入
+----------
+XML:
+ setter注入（set方法）
+ 构造器注入（构造方法）
+ 自动装配
+注解：
+ @Autowired
+ @Qualifier
+ @Value 
+
+配置第三方bean
+----------
+XML:
+ bean标签
+ 静态工厂
+ 实例工厂
+ FactoryBean
+注解：
+ @bean
+ 
+作用范围
+----------
+XML:
+ scope属性
+注解：
+ @scope
+
+生命周期
+----------
+XML:
+ 标准接口
+ init-method
+ destroy-method
+注解：
+ @PostConstruct
+ @PreDestroy
