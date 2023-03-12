@@ -514,3 +514,323 @@ XML:
 注解：
  @PostConstruct
  @PreDestroy
+ 
+//设置类运行器 
+@RunWith(SpringJUnit4ClassRunner.class) 
+//设置Spring环境对应的配置类 
+@ContextConfiguration(classes = {SpringConfiguration.class}) //加载配置类
+//@ContextConfiguration(locations={"classpath:applicationContext.xml"})//加载 配置文件
+
+
+AOP简介
+----------
+(1)前面一直在强调，Spring的AOP是对一个类的方法在不进行任何修改的前提下实现增强。对于上
+面的案例中BookServiceImpl中有save , update , delete和select方法,这些方法我们给起了一
+个名字叫连接点
+
+(2)在BookServiceImpl的四个方法中，update和delete只有打印没有计算万次执行消耗时间，
+但是在运行的时候已经有该功能，那也就是说update和delete方法都已经被增强，所以对于需要增
+强的方法我们给起了一个名字叫切入点
+
+(3)执行BookServiceImpl的update和delete方法的时候都被添加了一个计算万次执行消耗时间
+的功能，将这个功能抽取到一个方法中，换句话说就是存放共性功能的方法，我们给起了个名字叫通知
+
+(4)通知是要增强的内容，会有多个，切入点是需要被增强的方法，也会有多个，那哪个切入点需要添
+加哪个通知，就需要提前将它们之间的关系描述清楚，那么对于通知和切入点之间的关系描述，我们
+给起了个名字叫切面
+
+(5)通知是一个方法，方法不能独立存在需要被写在一个类中，这个类我们也给起了个名字叫通知类
+至此AOP中的核心概念就已经介绍完了，总结下
+
+连接点(JoinPoint)：程序执行过程中的任意位置，粒度为执行方法、抛出异常、设置变量等
+-在SpringAOP中，理解为方法的执行
+
+切入点(Pointcut):匹配连接点的式子
+-在SpringAOP中，一个切入点可以描述一个具体方法，也可也匹配多个方法
+  一个具体的方法:如com.itheima.dao包下的BookDao接口中的无形参无返回值的save方法
+  匹配多个方法:所有的save方法，所有的get开头的方法，所有以Dao结尾的接口中的任意
+  方法，所有带有一个参数的方法
+-连接点范围要比切入点范围大，是切入点的方法也一定是连接点，但是是连接点的方法就不一
+  定要被增强，所以可能不是切入点。
+
+通知(Advice):在切入点处执行的操作，也就是共性功能
+-在SpringAOP中，功能最终以方法的形式呈现
+
+通知类：定义通知的类
+
+切面(Aspect):描述通知与切入点的对应关系。
+
+
+AOP实现步骤
+----------
+步骤1:添加依赖
+pom.xml
+<dependency> 
+	<groupId>org.aspectj</groupId> 
+	<artifactId>aspectjweaver</artifactId> 
+	<version>1.9.4</version> 
+</dependency>
+
+因为spring-context中已经导入了spring-aop ,所以不需要再单独导入spring-aop
+导入AspectJ的jar包,AspectJ是AOP思想的一个具体实现，Spring有自己的AOP实现，但是相
+比于AspectJ来说比较麻烦，所以我们直接采用Spring整合ApsectJ的方式进行AOP开发
+
+步骤2:定义接口与实现类
+环境准备的时候，BookDaoImpl已经准备好，不需要做任何修改
+
+步骤3:定义通知类和通知
+通知就是将共性功能抽取出来后形成的方法，共性功能指的就是当前系统时间的打印。
+
+public class MyAdvice { 
+	public void method(){ 
+		System.out.println(System.currentTimeMillis()); 
+	}
+}
+类名和方法名没有要求，可以任意。
+
+步骤4:定义切入点
+BookDaoImpl中有两个方法，分别是save和update，我们要增强的是update方法，该如何定义呢?
+
+public class MyAdvice { 
+	@Pointcut("execution(void com.itheima.dao.BookDao.update())") 
+	private void pt(){} public void method(){ 
+		System.out.println(System.currentTimeMillis()); 
+	} 
+}
+说明:
+ 切入点定义依托一个不具有实际意义的方法进行，即无参数、无返回值、方法体无实际逻辑。
+ execution及后面编写的内容，后面会有章节专门去学习。
+
+步骤5:制作切面
+切面是用来描述通知和切入点之间的关系，如何进行关系的绑定
+
+public class MyAdvice { 
+	@Pointcut("execution(void com.itheima.dao.BookDao.update())") 
+	private void pt(){} 
+
+	@Before("pt()") 
+	public void method(){ 
+		System.out.println(System.currentTimeMillis()); 
+		} 
+}
+
+绑定切入点与通知关系，并指定通知添加到原始连接点的具体执行位置
+
+步骤6:将通知类配给容器并标识其为切面类
+@Component 
+@Aspect 
+public class MyAdvice { 
+	@Pointcut("execution(void com.itheima.dao.BookDao.update())") 
+	private void pt(){} 
+	
+	@Before("pt()") 
+	public void method(){ 
+		System.out.println(System.currentTimeMillis()); 
+	}
+ }
+ 
+步骤7:开启注解格式AOP功能
+@Configuration 
+@ComponentScan("com.itheima") 
+@EnableAspectJAutoProxy 
+public class SpringConfig { }
+
+步骤8:运行程序
+public class App { 
+	public static void main(String[] args) { 
+		ApplicationContext ctx = 
+		new AnnotationConfigApplicationContext(SpringConfig.class); 
+		BookDao bookDao = ctx.getBean(BookDao.class); 
+		bookDao.update(); 
+	} 
+}
+
+@EnableAspectJAutoProxy
+配置类定义上方
+开启注解格式AOP功能
+
+@Aspect
+切面类定义上方
+设置当前类为AOP切面类
+
+@Pointcut
+切入点方法定义上方
+设置切入点方法
+
+@Before
+通知方法定义上方
+设置当前通知方法与切入点之间的绑定关系，当前通知方法在原始切入点方法前运行
+
+AOP核心概念
+----------
+两个核心概念，分别是:
+目标对象(Target)：原始功能去掉共性功能对应的类产生的对象，这种对象是无法直接完成最终工作的
+
+代理(Proxy)：目标对象无法直接完成工作，需要对其进行功能回填，通过原始对象的代理对象实现
+
+AOP切入点表达式
+----------
+学习三个内容
+语法格式
+通配符
+写技巧
+
+语法格式
+
+描述方式一：执行com.itheima.dao包下的BookDao接口中的无参数update方法
+execution(void com.itheima.dao.BookDao.update())
+
+描述方式二：执行com.itheima.dao.impl包下的BookDaoImpl类中的无参数update方法
+execution(void com.itheima.dao.impl.BookDaoImpl.update())
+
+因为调用接口方法的时候最终运行的还是其实现类的方法，所以上面两种描述方式都是可以的。
+
+对于切入点表达式的语法为:
+切入点表达式标准格式：动作关键字(访问修饰符 返回值 包名.类/接口名.方法名(参数) 异常名）
+
+对于这个格式，我们不需要硬记，通过一个例子，理解它:
+execution(public User com.itheima.service.UserService.findById(int))
+
+execution：动作关键字，描述切入点的行为动作，例如execution表示执行到指定切入点
+public:访问修饰符,还可以是public，private等，可以省略
+User：返回值，写返回值类型
+com.itheima.service：包名，多级包使用点连接
+UserService:类/接口名称
+findById：方法名
+int:参数，直接写参数的类型，多个类型用逗号隔开
+异常名：方法定义中抛出指定异常，可以省略
+
+通配符
+----------
+* :单个独立的任意符号，可以独立出现，也可以作为前缀或者后缀的匹配符出现
+execution（public * com.itheima.*.UserService.find*(*))
+
+匹配com.itheima包下的任意包中的UserService类或接口中所有find开头的带有一个参数的方法
+
+..：多个连续的任意符号，可以独立出现，常用于简化包名与参数的书写
+execution（public User com..UserService.findById(..))
+
+匹配com包下的任意包中的UserService类或接口中所有名称为findById的方法
+
++：专用于匹配子类类型
+execution(* *..*Service+.*(..))
+
+接下来，我们把案例中使用到的切入点表达式来分析下:
+
+execution(void com.itheima.dao.BookDao.update()) 
+匹配接口，能匹配到
+
+execution(void com.itheima.dao.impl.BookDaoImpl.update()) 
+匹配实现类，能匹配到
+
+execution(* com.itheima.dao.impl.BookDaoImpl.update()) 
+返回值任意，能匹配到
+
+execution(* com.itheima.dao.impl.BookDaoImpl.update(*)) 返回值任意，但是update方法必须要有一个参数，无法匹配，要想匹配需要在update接口和实现类添加 参数
+
+execution(void com.*.*.*.*.update()) 返回值为void,com包下的任意包三层包下的任意类的update方法，匹配到的是实现类，能匹配
+
+execution(void com.*.*.*.update()) 
+返回值为void,com包下的任意两层包下的任意类的update方法，匹配到的是接口，能匹配
+
+execution(void *..update()) 
+返回值为void，方法名是update的任意包下的任意类，能匹配
+
+execution(* *..*(..)) 
+匹配项目中任意类的任意方法，能匹配，但是不建议使用这种方式，影响范围广
+
+execution(* *..u*(..)) 
+匹配项目中任意包任意类下只要以u开头的方法，update方法能满足，能匹配
+
+execution(* *..*e(..)) 
+匹配项目中任意包任意类下只要以e结尾的方法，update和save方法能满足，能匹配
+
+execution(void com..*()) 
+返回值为void，com包下的任意包任意类任意方法，能匹配，*代表的是方法
+
+execution(* com.itheima.*.*Service.find*(..)) 
+将项目中所有业务层方法的以find开头的方法匹配
+
+execution(* com.itheima.*.*Service.save*(..)) 
+将项目中所有业务层方法的以save开头的方法匹配
+
+书写技巧
+----------
+所有代码按照标准规范开发，否则以下技巧全部失效
+
+描述切入点通常描述接口，而不描述实现类,如果描述到实现类，就出现紧耦合了
+
+访问控制修饰符针对接口开发均采用public描述（可省略访问控制修饰符描述）
+
+返回值类型对于增删改类使用精准类型加速匹配，对于查询类使用*通配快速描述
+
+包名书写尽量不使用..匹配，效率过低，常用*做单个包描述匹配，或精准匹配
+
+接口名/类名书写名称与模块相关的采用*匹配，例如UserService书写成*Service，绑定业务层接口名
+
+方法名书写以动词进行精准匹配，名词采用匹配，例如getById书写成getBy,selectAll书写成selectAll
+
+参数规则较为复杂，根据业务方法灵活调整
+
+通常不使用异常作为匹配规则
+
+AOP通知类型
+----------
+
+@After
+----------
+通知方法定义上方
+设置当前通知方法与切入点之间的绑定关系，当前通知方法在原始切入点方法后运行
+
+@AfterReturning
+----------
+通知方法定义上方
+设置当前通知方法与切入点之间绑定关系，当前通知方法在原始切入点方法正常执行完毕后执行
+
+@AfterThrowing
+----------
+通知方法定义上方
+设置当前通知方法与切入点之间绑定关系，当前通知方法在原始切入点方法运行抛出异常后执行
+
+@Around
+----------
+通知方法定义上方
+设置当前通知方法与切入点之间的绑定关系，当前通知方法在原始切入点方法前后运行
+
+环绕通知注意事项
+1.环绕通知必须依赖形参ProceedingJoinPoint才能实现对原始方法的调用，进而实现原始方法调用前后同时添加通知
+2. 通知中如果未使用ProceedingJoinPoint对原始方法进行调用将跳过原始方法的执行
+3. 对原始方法的调用可以不接收返回值，通知方法设置成void即可，如果接收返回值，最好设定为Object类型
+4. 原始方法的返回值如果是void类型，通知方法的返回值类型可以设置成void,也可以设置成Object
+5. 由于无法预知原始方法运行后是否会抛出异常，因此环绕通知方法必须要处理Throwable异常
+
+
+事务管理
+----------
+@EnableTransactionManagement
+配置类定义上方
+设置当前Spring环境中开启注解式事务支持
+
+@Transactional
+----------
+业务层接口上方 业务层实现类上方 业务方法上方
+为当前业务层方法添加事务（如果设置在类或接口上方则类或接口中所有方法均添加事务）
+
+下面这些属性都可以在@Transactional注解的参数上进行设置。
+
+readOnly：true只读事务，false读写事务，增删改要设为false,查询设为true。
+timeout:设置超时时间单位秒，在多长时间之内事务没有提交成功就自动回滚，-1表示不设置超时时间。
+rollbackFor:当出现指定异常进行事务回滚
+noRollbackFor:当出现指定异常不进行事务回滚
+-思考:出现异常事务会自动回滚，这个是我们之前就已经知道的
+-noRollbackFor是设定对于指定的异常不回滚，这个好理解
+-rollbackFor是指定回滚异常，对于异常事务不应该都回滚么，为什么还要指定
+-rollbackForClassName等同于rollbackFor,只不过属性为异常的类全名字符串
+-noRollbackForClassName等同于noRollbackFor，只不过属性为异常的类全名字符串
+-isolation设置事务的隔离级别
+ DEFAULT :默认隔离级别, 会采用数据库的隔离级别
+ READ_UNCOMMITTED : 读未提交
+ READ_COMMITTED : 读已提交
+ REPEATABLE_READ : 重复读取
+ SERIALIZABLE: 串行化
+ 
