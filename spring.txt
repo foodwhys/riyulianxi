@@ -332,7 +332,8 @@ JdbcConfig类要放入到com.itheima.config包下，需要被Spring的配置类�
 
 @Configuration 
 public class JdbcConfig { 
-	@Bean public DataSource dataSource(){ 
+	@Bean 
+	public DataSource dataSource(){ 
 		DruidDataSource ds = new DruidDataSource(); 
 		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
 		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
@@ -352,7 +353,8 @@ public class JdbcConfig {
 步骤1:去除JdbcConfig类上的注解
 
 public class JdbcConfig { 
-	@Bean public DataSource dataSource(){ 
+	@Bean 
+	public DataSource dataSource(){ 
 		DruidDataSource ds = new DruidDataSource(); 
 		ds.setDriverClassName("com.mysql.jdbc.Driver"); 
 		ds.setUrl("jdbc:mysql://localhost:3306/spring_db"); 
