@@ -194,7 +194,9 @@ AnnotationConfigApplicationContext是加载配置类
 ApplicationContext ctx = 
 new AnnotationConfigApplicationContext(SpringConfig.class); 
 BookDao bookDao = (BookDao) ctx.getBean("bookDao"); 
-System.out.println(bookDao); BookService bookService = ctx.getBean(BookService.class); System.out.println(bookService);
+System.out.println(bookDao); 
+BookService bookService = ctx.getBean(BookService.class); 
+System.out.println(bookService);
 
 @Scope
 ----------
