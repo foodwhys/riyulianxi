@@ -240,3 +240,29 @@ SpringMVC控制器方法形参定义前面
 设置当前控制器方法请求访问路径与请求动作，每种对应一个请求动作，
 例如@GetMapping对应GET请求
 
+@RestControllerAdvice
+-------------
+Rest风格开发的控制器增强类定义上方
+为Rest风格开发的控制器类做增强
+
+//@RestControllerAdvice用于标识当前类为REST风格对应的异常处理器
+@RestControllerAdvice 
+public class ProjectExceptionAdvice { //除了自定义的异常处理器，保留对Exception类型的异常处理，用于处理非预期的异常 @ExceptionHandler(Exception.class) 
+public Result doException(Exception ex){ 
+		System.out.println("嘿嘿,异常你哪里跑！") 
+		return new Result(666,null,"嘿嘿,异常你哪里跑！");
+	 } 
+}
+
+@RestControllerAdvice
+-------------
+Rest风格开发的控制器增强类定义上方
+为Rest风格开发的控制器类做增强
+
+@ExceptionHandler
+-------------
+专用于异常处理的控制器方法上方
+
+设置指定异常的处理方案，功能等同于控制器方法，
+出现异常后终止原始控制器执行,并转入当前方法执行
+
