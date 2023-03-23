@@ -1,0 +1,13 @@
+修改程序图标
+------------------
+选择form-》属性-》应用程序-》图标选择
+
+编译程序
+----------
+重新生成解决方案
+TextBox右键Multiline
+
+Button属性
+----------
+AcceptButton 每次按回车，按钮单击
+CancelButton 按Esc单击，该按钮
