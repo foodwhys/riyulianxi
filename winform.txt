@@ -11,3 +11,27 @@ Button属性
 ----------
 AcceptButton 每次按回车，按钮单击
 CancelButton 按Esc单击，该按钮
+
+AutoSize
+----------
+设置手动布局false
+
+backgroundImage
+----------
+设置背景图片
+
+SplitContainer
+----------
+区分中心
+
+tabcontrol
+----------
+bable分页选项
+
+Panle
+----------
+区分选项
+
+DataGridView
+----------
+数据列表
