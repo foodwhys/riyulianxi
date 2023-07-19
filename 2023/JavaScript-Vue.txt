@@ -154,9 +154,99 @@ String对象的创建方式有2种
 
 JSON对象
 ---------------
+key必须使用引号并且是双引号标记，value可以是任意数据类型。
+{
+    "key":value,
+    "key":value,
+    "key":value
+}
+
+
+JavaScript 中自定义对象特别简单，其语法格式如下：
+---------------
+var 对象名 = {
+    属性名1: 属性值1, 
+    属性名2: 属性值2,
+    属性名3: 属性值3,
+    函数名称: function(形参列表){}
+};
+
 
 
 
 第二类：
----------------
 BOM对象,主要是和浏览器相关的几个对象
+---------------
+Window 浏览器窗口对象
+Navigator 浏览器对象
+Screen 屏幕对象
+History 历史记录对象
+Locationd 地址栏对象
+
+我们重点学习
+---------------
+Window对象
+Location对象 
+
+直接使用window，其中 window. 可以省略
+---------------
+window.alert("Hello Window");
+alert("Hello Window");
+
+第三类：DOM
+---------------
+Document：整个文档对象
+Element：元素对象
+Attribute：属性对象
+Text：文本对象
+Comment：注释对象
+
+
+
+document.getElementById()
+根据id属性值获取，返回单个Element对象
+
+document.getElementsByTagName()
+根据标签名称获取，返回Element对象数组
+
+document.getElementsByName()
+根据name属性值获取，返回Element对象数组
+
+document.getElementsByClassName()
+根据class属性值获取，返回Element对象数组
+
+---------------
+JavaScript事件
+---------------
+
+
+事件绑定 
+---------------
+方式1：通过html标签中的事件属性进行绑定
+
+例如一个按钮，我们对于按钮可以绑定单机事件，可以借助标签的onclick属性，属性值指向一个函数。
+
+在VS Code中创建名为09. JS-事件-事件绑定.html，添加如下代码：
+<input type="button" id="btn1" value="事件绑定1" onclick="on()">
+
+方式2：通过DOM中Element元素的事件属性进行绑定
+
+依据我们学习过得DOM的知识点，我们知道html中的标签被加载成element对象，
+所以我们也可以通过element对象的属性来操作标签的属性。
+此时我们再次添加一个按钮，代码如下：
+<input type="button" id="btn2" value="事件绑定2">
+
+document.getElementById('btn2').onclick = function(){
+    alert("按钮2被点击了...");
+}
+
+
+常见事件
+---------------
+onclick 鼠标单击事件
+onblur 元素失去焦点
+onfocus 元素获得焦点
+onload 某个页面或图像被完成加载
+onsubmit 当表单提交时触发该事件
+onmouseover 鼠标被移到某元素之上
+onmouseout 鼠标从某元素移开
