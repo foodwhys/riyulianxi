@@ -24,3 +24,195 @@ Ajax
         }
     }
 </script>
+
+------------
+Axios
+------------
+
+1.引入Axios的js文件
+------------
+<script src="js/axios-0.18.0.js"></script>
+
+2.使用Axios发送请求，并获取响应结果
+------------
+发送 get 请求
+axios({
+    method: "get",
+    url: "http://yapi.smart-xwork.cn/mock/169327/emp/list"
+}).then((result) => {
+	//成功回调函数
+    console.log(result.data);
+});
+发送 post 请求
+axios({
+    method: "post",
+    url: "http://yapi.smart-xwork.cn/mock/169327/emp/deleteById",
+    data: "id=1"
+}).then((result) => {
+    //成功回调函数
+    console.log(result.data);
+});
+
+请求方式别名
+------------
+axios.get(url [, config])
+axios.delete(url [, config])
+axios.post(url [, data[, config]])
+axios.put(url [, data[, config]])
+
+发送GET请求
+------------
+axios.get("http://yapi.smart-xwork.cn/mock/169327/emp/list")
+  .then((result) => {
+    console.log(result.data);
+});
+
+发送POST请求
+------------
+axios.post("http://yapi.smart-xwork.cn/mock/169327/emp/deleteById","id=1")
+  .then((result) => {
+    console.log(result.data);
+});
+
+前端工程化：
+------------
+是指在企业级的前端项目开发中，
+把前端开发所需的工具、技术、流程、经验等进行规范化、标准化。
+
+Vue-cli提供了如下功能：
+------------
+统一的目录结构
+本地调试
+热部署
+单元测试
+集成打包上线
+
+目录结构
+------------
+assets 静态资源
+components 可重用的组件
+router 路由配置
+views 视图组件(页面)
+App.vue 入口页面（根组件）
+main.js 入口js文件
+
+vue的组件文件包含3个部分
+------------
+template: 模板部分，主要是HTML代码，用来展示页面主体结构的
+script: js代码区域，主要是通过js代码来控制模板的数据来源和行为的
+style: css样式部分，主要通过css样式控制模板的页面效果得
+
+template: 模板部分
+------------
+<template>
+  <div id="app">
+    {{message}}
+  </div>
+</template>
+
+script: js代码区域
+------------
+<script>
+export default {
+  data(){
+    return {
+      "message":"hello world"
+    }
+  }
+}
+</script>
+
+style: css样式部分
+------------
+<style>
+
+</style>
+
+------------
+Vue组件库Element
+------------
+
+ElementUI的组件库
+------------
+npm install element-ui@2.15.3 
+
+main.js这个入口js文件中引入ElementUI的组件库
+------------
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+
+Vue.use(ElementUI);
+
+Pagination分页
+------------
+<el-pagination
+    background
+    layout="prev, pager, next"
+    :total="1000">
+</el-pagination>
+
+组件属性详解
+------------
+background: 添加北京颜色，也就是上图蓝色背景色效果。
+layout: 分页工具条的布局，其具体值包含`sizes`, `prev`, `pager`, `next`, `jumper`, `->`, `total`, `slot` 这些值
+total: 数据的总数量
+
+layout属性
+------------
+layout="sizes,prev, pager, next,jumper,total"
+
+分页组件事件
+------------
+size-change ： pageSize 改变时会触发 
+current-change ：currentPage 改变时会触发 
+
+Vue路由
+------------
+Vue Router 是 Vue 的官方路由。
+
+路由组成
+------------
+VueRouter：路由器类，根据路由请求在路由视图中动态渲染选中的组件
+<router-link>：请求链接组件，浏览器会解析成<a>
+<router-view>：动态视图组件，用来渲染展示与路由路径对应的组件
+
+路由入门
+------------
+npm install vue-router@3.5.1
+
+在src/router/index.js定义路由表，根据其提供的模板代码进行修改，最终代码如下：
+------------
+import Vue  'vue'
+import VueRouter  'vue-router'
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/emp',  //地址hash
+    name: 'emp',
+    component:  () => import('../views/tlias/EmpView.vue')  //对应的vue组件
+  },
+  {
+    path: '/dept',
+    name: 'dept',
+    component: () => import('../views/tlias/DeptView.vue')
+  }
+]
+
+const router = new VueRouter({
+  routes
+})
+
+export default router
+
+
+在main.js中，我们已经引入了router功能：
+------------
+import router from './router'
+
+new Vue({
+ router,
+ render:h => h(app)
+}).$mount('#app
+
