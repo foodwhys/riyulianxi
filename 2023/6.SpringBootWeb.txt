@@ -1,0 +1,148 @@
+1. 原始方式 
+----------
+@RestController
+public class RequestController {
+@RequestMapping("/simpleParam")
+public String simpleParam(HttpServletRequest request){
+	//根据指定的参数名获取请求参数的数据值
+	String request.getParameter("参数名")
+	
+2.SpringBoot方式
+----------
+@RestController
+public class RequestController {
+//springboot方式
+@RequestMapping("/simpleParam")
+public String simpleParam(@RequestParam(name = "name", required =false) String name ,
+Integer age ){
+//形参名和
+请求参数名保持一致
+
+@RequestParam中的required属性默认为true
+代表该请求参数必须传递，如果不传递将报错
+
+简单实体对象
+----------
+@RequestMapping("/simplePojo")
+public String simplePojo(User user){
+
+复杂实体对象的封装，需要遵守如下规则：
+----------
+请求参数名与形参对象属性名相同，按照对象层次结构关系即可接收嵌套实体类属性参数。
+
+数组参数
+----------
+@RequestMapping("/arrayParam")
+public String arrayParam(String[] hobby){
+
+在前端请求时，有两种传递形式
+----------
+方式一： xxxxxxxxxx?hobby=game&hobby=java
+方式二：xxxxxxxxxxxxx?hobby=game,java
+
+集合参数
+----------
+//数组集合参数
+@RequestMapping("/listParam")
+public String listParam(@RequestParam List<String> hobby){
+
+前端请求方式
+----------
+方式一： xxxxxxxxxx?hobby=game&hobby=java
+方式二：xxxxxxxxxxxxx?hobby=game,java
+
+日期参数
+----------
+日期的格式多种多样
+需要通过@DateTimeFormat注解，
+以及其pattern属性来设置日期的格式
+@RequestMapping("/dateParam")
+public String dateParam(@DateTimeFormat(pattern = "yyyy-MM-ddHH:mm:ss")
+ LocalDateTime updateTime){
+ 
+JSON参数
+----------
+传递json格式的参数，在Controller中会使用实体类进行封装
+封装规则：JSON数据键名与形参对象属性名相同，定义POJO类型形参即可接收参数。
+需要使用@RequestBody标识。
+
+@RequestBody注解：将JSON数据映射到形参的实体类对象中
+（JSON中的key和实体类中的属性名保持一致）
+
+路径参数
+----------
+前端：通过请求URL直接传递参数
+后端：使用{…}来标识该路径参数，需要使用@PathVariable获取路径参数
+
+@RequestMapping("/path/{id}")
+public String pathParam(@PathVariable Integer id){
+
+传递多个路径参数
+----------
+@RequestMapping("/path/{id}/{name}")
+public String pathParam2(@PathVariable Integer id, 
+@PathVariable String name){
+
+----------
+响应
+----------
+
+@ResponseBody
+----------
+类型：方法注解、类注解
+位置：书写在Controller方法上或类上
+作用：将方法返回值直接响应给浏览器
+
+@RestController注解方法添加了@RequestMapping注解
+----------
+@RestController = @Controller + @ResponseBody
+
+统一响应结果
+----------
+public class Result {
+private Integer code;//响应码，1 代表成功; 0 代表失败
+private String msg; //响应码 描述字符串
+
+//增删改 成功响应(不需要给前端返回数据)
+public static Result success(){
+return new Result(1,"success",null);
+ }
+ 
+//查询 成功响应(把查询结果做为返回数据响应给前端)
+public static Result success(Object data){
+return new Result(1,"success",data);
+ }
+ 
+//失败响应
+public static Result error(String msg){
+return new Result(0,msg,null);
+ }
+
+三层结构的解耦
+
+反转控制 简称IOC
+----------
+对象的创建权由程序员主动创建转移到容器(由容器创建、管理对象)。
+这个容器称为：IOC容器或Spring容器
+IOC容器中创建、管理的对象，称之为：bean对象
+
+依赖注入 简称DI
+----------
+程序运行时需要某个资源，此时容器就为其提供这个资源
+
+@Autowired
+---------- 
+//运行时,从IOC容器中获取该类型对象,赋值给该变量
+private EmpService empService ;
+
+@Component 声明bean的基础注解
+----------
+//将当前对象交给IOC容器管理,成为IOC容器的bean
+public class EmpServiceA implements EmpService {
+
+@Component的衍生注解
+----------
+@Controller （标注在控制层类上）
+@Service （标注在业务层类上）
+@Repository （标注在数据访问层类上）
+不属于以上三类时，用此注解
