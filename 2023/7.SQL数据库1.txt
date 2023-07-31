@@ -1,0 +1,179 @@
+DDL:数据库设计
+DML；数据库操作
+DQL：数据库操作
+
+连接
+-----------------
+mysql -u用户名 -p密码 [-h数据库服务器的IP地址 -P端口号]
+-h 参数不加，默认连接的是本地 127.0.0.1 的MySQL服务器
+-P 参数不加，默认连接的端口号是 3306
+
+SQL通用语法
+-----------------
+1、SQL语句可以单行或多行书写，以分号结尾
+2、SQL语句可以使用空格/缩进来增强语句的可读性。
+3、MySQL数据库的SQL语句不区分大小写
+4、注释：
+单行注释：-- 注释内容 或 # 注释内容(MySQL特有)
+多行注释： /* 注释内容 */
+
+分类
+-----------------
+1.DDL(Data Definition Language)
+数据定义语言，用来定义数据库对象(数据库，表，字段)
+2.DML(Data Manipulation Language)
+数据操作语言，用来对数据库表中的数据进行增删改
+3.DQL(Data Query Language)
+数据查询语言，用来查询数据库中表的记录
+4.DCL(Data Control Language)
+数据控制语言，用来创建数据库用户、控制数据库的访问权限
+
+数据库设计-DDL
+-----------------
+DDL中数据库的常见操作：查询、创建、使用、删除。
+
+查询所有数据库
+-----------------
+show databases;
+
+查询当前数据库
+-----------------
+select database();
+我们要操作某一个数据库，必须要切换到对应的数据库中。
+通过指令：select database() ，就可以查询到当前所处的数据库
+
+创建数据库
+-----------------
+create database [ if not exists ] 数据库名;
+案例： 创建一个itcast数据库。
+create database itcast;
+
+使用数据库
+-----------------
+use 数据库名 ;
+案例：切换到itcast数据
+use itcast;
+
+删除数据库
+-----------------
+drop database [ if exists ] 数据库名 ;
+如果删除一个不存在的数据库，将会报错。
+可以加上参数 if exists ，如果数据库存在，再执行删除，否则不执行删除。
+drop database if exists itcast; -- itcast数据库存在时删除
+
+-----------------
+表操作
+-----------------
+DDL语句当中关于表结构的操作
+
+创建
+-----------------
+create table 表名(
+ 字段1 字段1类型 [约束] [comment 字段1注释 ],
+ 字段2 字段2类型 [约束] [comment 字段2注释 ],
+ ......
+ 字段n 字段n类型 [约束] [comment 字段n注释 ]
+) [ comment 表注释 ] ;
+
+注意： [ ] 中的内容为可选参数； 最后一个字段后面没有逗号
+
+约束
+-----------------
+not null : 非空约束 限制该字段值不能为null 
+unique : 唯一约束 保证字段的所有数据都是唯一、不重复的
+primary key : 主键约束 主键是一行数据的唯一标识，要求非空且唯一
+default : 默认约束 保存数据时，如果未指定该字段值，则采用默认值
+foreign key : 外键约束 让两张表的数据建立连接，保证数据的一致性和完整性
+
+建表语句
+-----------------
+create table tb_user (
+ id int primary key comment 'ID,唯一标识',
+ username varchar(20) not null unique comment '用户名',
+ name varchar(10) not null comment '姓名',
+ age int comment '年龄',
+ gender char(1) default '男' comment '性别'
+) comment '用户表';
+
+主键自增 auto_increment
+-----------------
+每次插入新的行记录时，数据库自动生成id字段(主键)下的值
+具有auto_increment的数据列是一个正数序列开始增长(从1开始自增)
+create table tb_user (
+ id int primary key auto_increment comment 'ID,唯一标识', #主键自动增长
+ username varchar(20) not null unique comment '用户名',
+ name varchar(10) not null comment '姓名',
+ age int comment '年龄',
+ gender char(1) default '男' comment '性别'
+) comment '用户表';
+
+char 与 varchar 都可以描述字符串
+-----------------
+char是定长字符串
+varchar是变长字符串
+
+日期时间类型
+-----------------
+DATE YYYY-MM-DD  日期值
+TIME HH:MM:SS 时间值或持续时间
+YEAR YYYY 年份值
+DATETIME  YYYY-MM-DD HH:MM:SS 混合日期和时间值
+TIMESTAMP YYYY-MM-DD HH:MM:SS 混合日期和时间值，时间戳
+
+关于表结构的查询，修改，删除操作，工作中一般都是直接基于图形化界面操作。
+
+查询当前数据库所有表
+-----------------
+show tables;
+
+查看指定表结构
+-----------------
+desc 表名 ;
+#可以查看指定表的字段、字段的类型、是否可以为NULL、是否存在默认值等信息
+
+查询指定表的建表语句
+-----------------
+show create table 表名 ; 1
+
+添加字段
+-----------------
+alter table 表名 add 字段名 类型(长度) [comment 注释] [约束];
+
+修改数据类型
+-----------------
+alter table 表名 modify 字段名 新数据类型(长度);
+alter table 表名 change 旧字段名 新字段名 类型(长度) [comment 注释][约束];
+
+案例：修改qq字段的字段类型，将其长度由11修改为13
+alter table tb_emp modify qq varchar(13) comment 'QQ号码';
+案例：修改qq字段名为 qq_num，字段类型varchar(13)
+alter table tb_emp change qq qq_num varchar(13) comment 'QQ号码'; 1
+
+删除字段
+-----------------
+alter table 表名 drop 字段名
+案例：删除tb_emp表中的qq_num字段
+alter table tb_emp drop qq_num;
+
+删除
+-----------------
+drop table [ if exists ] 表名;
+案例：如果tb_emp表存在，则删除tb_emp表
+drop table if exists tb_emp; -- 在删除表时，表中的全部数据也会被删除。
+
+数据库操作-DML
+-----------------
+DML英文全称是Data Manipulation Language(数据操作语言)，用来对数据库中表的数据记录进行增、删、改操作。
+
+增加(insert)
+-----------------
+向指定字段添加数据
+insert into 表名 (字段名1, 字段名2) values (值1, 值2);
+全部字段添加数据
+insert into 表名 values (值1, 值2, ...);
+批量添加数据（指定字段）
+insert into 表名 (字段名1, 字段名2) values (值1, 值2), (值1, 值2);
+批量添加数据（全部字段）
+insert into 表名 values (值1, 值2, ...), (值1, 值2, ...);
+
+
