@@ -1,0 +1,137 @@
+Maven高级内容包括:
+分模块设计与开发
+继承与聚合
+私服
+
+分模块设计与开发
+1. 创建maven模块 tlias-pojo，存放实体类
+A. 创建一个正常的Maven模块，模块名tlias-pojo
+分模块设计
+-------------------
+如果在当前公司的其他项目组当中，也想使用我们所封装的这些公共的组件，该怎么办？大家可以思考一下。
+
+方案一：直接依赖我们当前项目 tlias-web-management ，但是存在两大缺点：
+1.这个项目当中包含所有的业务功能代码，而想共享的资源，仅仅是pojo下的实体类，以及utils 下的工具类。
+如果全部都依赖进来，项目在启动时将会把所有的类都加载进来，会影响性能。
+2.如果直接把这个项目都依赖进来了，那也就意味着我们所有的业务代码都对外公开了，这个是非常不安全的。
+
+方案二：分模块设计
+1.将pojo包下的实体类，抽取到一个maven模块中 tlias-pojo
+2.将utils包下的工具类，抽取到一个maven模块中 tlias-utils
+3.其他的业务代码，放在tlias-web-management这个模块中，在该模块中需要用到实体类
+pojo、工具类utils，直接引入对应的依赖即可
+
+
+注意：分模块开发需要先针对模块功能进行设计，再进行编码。不会先将工程开发完毕，然
+后进行拆分。
+PS：当前我们是为了演示分模块开发，所以是基于我们前面开发的案例项目进行拆分的，实
+际中都是分模块设计，然后再开发的。
+
+实现
+-------------------
+思路我们分析完毕，接下来，我们就根据我们分析的思路，按照如下模块进行拆分：
+1. 创建maven模块 tlias-pojo，存放实体类
+A. 创建一个正常的Maven模块，模块名tlias-pojo
+B. 然后在tlias-pojo中创建一个包 com.itheima.pojo (和原来案例项目中的pojo包名一致)
+C. 将原来案例项目 tlias-web-management 中的pojo包下的实体类，复制到tlias-pojo模块中
+D. 在 tlias-pojo 模块的pom.xml文件中引入依赖
+<dependencies>
+	<dependency>
+	<groupId>org.projectlombok</groupId>
+	<artifactId>lombok</artifactId>
+	<version>1.18.24</version>
+	</dependency>
+</dependencies>
+
+E. 删除原有案例项目tlias-web-management的pojo包
+【直接删除不要犹豫，我们已经将该模块拆分出去了】，
+然后在pom.xml中引入 tlias-pojo的依赖
+
+总结
+-------------------
+1). 什么是分模块设计：将项目按照功能拆分成若干个子模块
+2). 为什么要分模块设计：方便项目的管理维护、扩展，也方便模块间的相互调用，资源共享
+3). 注意事项：分模块设计需要先针对模块功能进行设计，再进行编码。不会先将工程开发完毕，然后进行拆分
+
+
+继承与聚合
+-------------------
+我们可以再创建一个父工程 tlias-parent ，
+然后让上述的三个模块 tlias-pojo、tlias-utils、tlias-web-management 
+都来继承这个父工程 。
+
+然后再将各个模块中都共有的依赖，都
+提取到父工程 tlias-parent中进行配置，只要子工程继承了父工程，依赖它也会继承下来，这样就
+无需在各个子工程中进行配置了。
+
+实现：
+<parent>
+	<groupId>...</groupId>
+	<artifactId>...</artifactId>
+	<version>...</version>
+	<relativePath>....</relativePath>
+</parent>
+
+父工程tlias-parent的pom.xml文件配置如下
+-------------------
+<parent>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-parent</artifactId>
+	<version>2.7.5</version>
+	<relativePath/> <!-- lookup parent from repository -->
+</parent>
+	<groupId>com.itheima</groupId>
+	<artifactId>tlias-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+<packaging>pom</packaging>
+
+Maven打包方式
+-------------------
+jar：普通模块打包，springboot项目基本都是jar包（内嵌tomcat运行）
+war：普通web程序打包，需要部署在外部的tomcat服务器中运行
+pom：父工程或聚合工程，该模块不写代码，仅进行依赖管理
+
+在子工程的pom.xml文件中，配置继承关系。
+-------------------
+<parent>
+	<groupId>com.itheima</groupId>
+	<artifactId>tlias-parent</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<relativePath>../tlias-parent/pom.xml</relativePath>
+</parent>
+<artifactId>tlias-utils</artifactId>
+<version>1.0-SNAPSHOT</version>
+
+这里是以 tlias-utils 为例，指定了其父工程。其他的模块，都是相同的配置方式
+
+注意：
+1.在子工程中，配置了继承关系之后，坐标中的groupId是可以省略的，因为会自动继承父工程的 。
+2.relativePath指定父工程的pom文件的相对位置（如果不指定，将从本地仓库/远程仓库查找该工程）。
+   ../ 代表的上一级目录
+   
+3). 在父工程中配置各个工程共有的依赖（子工程会自动继承父工程的依赖）。
+<dependencies>
+	<dependency>
+		<groupId>org.projectlombok</groupId>
+		<artifactId>lombok</artifactId>
+		<version>1.18.24</version>
+	</dependency>
+</dependencies>
+
+工程结构说明：
+-------------------
+因为我们是项目开发完毕之后，给大家基于现有项目拆分的各个模块，
+tlias-web-management已经存在了，然后再创建各个模块与父工程，
+所以父工程与模块之间是平级的。
+
+而实际项目中，可能还会见到下面的工程结构：
+-------------------
+而在真实的企业开发中，都是先设计好模块之后，再开始创建模块，开发项目。
+一般都会先创建父工程 tlias-parent，然后将创建的各个子模块，都放在父工程parent
+下面。 这样层级结构会更加清晰一些。
+
+PS：上面两种工程结构，都是可以正常使用的，没有一点问题。 
+只不过，第二种结构，看起来，父子工程结构更加清晰、更加直观。
+
+版本锁定
+-------------------
