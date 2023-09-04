@@ -161,3 +161,756 @@ Shell 与 Bash 是包含与被包含的关系是 Shell 终端程序中的一份�
 
 执行命令的必备知识
 -----------------------------------
+常见的执行 Linux 命令的格式是下面这样的。
+命令名称 [命令参数] 命令对象
+
+➢ ：就是语法中的“动词”，表达的是想要做的事情，
+例如创建用户、查看文件、重启系统等操作。
+
+➢ ：用于对命令进行调整，让“修改”过的命令能更好地贴合
+工作需求，达到事半功倍的效果。
+
+参数可以用长格式（完整的选项名称），
+也可以用短格式（单个字母的缩写），
+两者分别用“--”与“-”作为前缀
+
+Linux 命令参数的长格式与短格式示例
+-----------------------------------
+长格式 man –-help
+短格式 man -h
+
+命令名称、命令参数与命令对象的区分
+-----------------------------------
+命令名称、命令参数与命令对象之间要用空格进行分隔，且字母严格区分大小写。
+
+可选参数
+-----------------------------------
+在 Linux 相关的图书中，我们会约定俗成地将可选择的、可加或可不加的、非必需
+的参数使用中括号引起来，例如“man [命令参数]”；
+
+必有参数
+-----------------------------------
+而命令所要求的、必须有的参数或对象值，则不带中括号。
+这样一来，读者可以更好地理解下面出现的命令格式。
+
+man 命令中常用按键及其作用
+-----------------------------------
+空格键 向下翻一页
+PaGe down 向下翻一页
+PaGe up 向上翻一页
+home 直接前往首页
+end 直接前往尾页
+/ 从上至下搜索某个关键词，如“/linux”
+? 从下至上搜索某个关键词，如“?linux”
+n 定位到下一个搜索到的关键词
+N 定位到上一个搜索到的关键词
+q 退出帮助文档
+
+man 命令中帮助信息的结构及其代表意义
+-----------------------------------
+NAME 命令的名称
+SYNOPSIS 参数的大致使用方法
+DESCRIPTION 介绍说明
+EXAMPLES 演示（附带简单说明）
+OVERVIEW 概述
+DEFAULTS 默认的功能
+OPTIONS 具体的可用选项（带介绍）
+ENVIRONMENT 环境变量
+FILES 用到的文件
+SEE ALSO 相关的资料
+HISTORY 维护历史与联系方式
+
+额外四个快捷键/组合键小技巧
+-----------------------------------
+➢ ：在 Bash 解释器的快捷键中，它能够实现对命令、参数或文件的内容补全
+
+➢ ：当同时按下键盘上的 Ctrl 和字母 C 的时候，意味着终止当前进程的运行。
+
+➢ ：当同时按下键盘上的 Ctrl 和字母 D 的时候，表示键盘输入结束。
+
+➢ ：当同时按下键盘上行的 Ctrl 和字母 l 的时候，会清空当前终端中已有的内容
+（相当于清屏操作）。
+
+从现在开始，后面的内容都是重磅内容（意思是要背诵）
+linux大约 150 个常用的Linux 命令，以及 50 多个热门的命令 
+老师根据 10 多年来的运维经验优先筛选出了 10 多个高频使用的基础命令。
+
+-----------------------------------
+常用系统工作命令
+-----------------------------------
+
+1.echo 命令
+-----------------------------------
+echo 命令用于在终端设备上输出字符串或变量提取后的值，
+语法格式为“echo [字符串] [$变量]”。
+
+例如，把指定字符串“LinuxProbe.com”输出到终端屏幕的命令为：
+[root@linuxprobe~]# echo LinuxProbe.com
+该命令会在终端屏幕上显示如下信息：
+LinuxProbe.com
+
+下面使用“$变量”的方式提取出变量 SHELL 的值，并将其输出到屏幕上：
+[root@linuxprobe~]# echo $SHELL
+/bin/bash
+
+2.date命令
+-----------------------------------
+date 命令用于显示或设置系统的时间与日期，语法格式为“date [+指定的格式]”。
+
+用户只需在强大的 date 命令后输入以“+”号开头的参数，即可按照指定格式来输出系
+统的时间或日期，这样在日常工作时便可以把备份数据的命令与指定格式输出的时间信息结
+合到一起
+
+date 命令中的参数及其作用
+%S 秒（00～59）
+%M 分钟（00～59）
+%H 小时（00～23）
+
+%I 小时（00～12）
+%m 月份（1～12）
+%p 显示出 AM 或 PM
+%a 缩写的工作日名称（例如，Sun）
+%A 完整的工作日名称（例如，Sunday）
+%b 缩写的月份名称（例如，Jan）
+%B 完整的月份名称（例如，January）
+%q 季度（1～4）
+%y 简写年份（例如，20）
+%Y 完整年份（例如，2020）
+%d 本月中的第几天
+%j 今年中的第几天
+%n 换行符（相当于按下回车键）
+%t 跳格（相当于按下 Tab 键）
+
+
+按照默认格式查看当前系统时间的 date 命令如下所示：
+[root@linuxprobe~]# date
+Sat Sep 5 09:13:45 CST 2020
+
+按照“年-月-日 小时:分钟:秒”的格式查看当前系统时间的date 命令如下所示：
+[root@linuxprobe~]# date "+%Y-%m-%d %H:%M:%S"
+2020-09-05 09:14:35
+
+将系统的当前时间设置为 2020 年 11 月 1 日 8 点 30 分的 date 命令如下所示：
+[root@linuxprobe~]# date -s "20201101 8:30:00"
+Sun Nov 1 08:30:00 CST 2020
+
+再次使用 date 命令并按照默认的格式查看当前的系统时间，如下所示：
+[root@linuxprobe~]# date
+Sun Nov 1 08:30:08 CST 2020
+
+date 命令中的参数%j 可用来查看今天是当年中的第几天。这个参数能够很好地区分备份
+时间的早晚，即数字越大，越靠近当前时间。该参数的使用方式以及显示结果如下所示：
+[root@linuxprobe~]# date "+%j"
+306
+
+3.timedatectl
+-----------------------------------
+timedatectl 命令用于设置系统的时间，英文全称为“time date control”，
+语法格式为“timedatectl [参数]”。
+
+status 显示状态信息
+list-timezones 列出已知时区
+set-time 设置系统时间
+set-timezone 设置生效时区
+
+查看系统时间与时区的方法如下：
+
+[root@linuxprobe~]# timedatectl status
+Local time: Sun 2020-09-06 19:51:22 CST
+Universal time: Sun 2020-09-06 11:51:22 UTC
+RTC time: Sun 2020-09-06 19:51:21
+Time zone: Asia/Shanghai (CST, +0800)
+System clock synchronized: no
+NTP service: inactive
+RTC in local TZ: no
+
+如果您查到的时区不是上海（Asia/Shanghai），可以手动进行设置：
+[root@linuxprobe~]# timedatectl set-timezone Asia/Shanghai
+
+如果时间还是不正确，可再手动修改系统日期：
+[root@linuxprobe~]# timedatectl set-time 2021-05-18
+
+而如果想修改时间的话，也很简单：
+[root@linuxprobe~]# timedatectl set-time 9:30
+[root@linuxprobe~]# date
+Tue May 18 09:30:01 CST 2021
+
+4.rebot命令
+-----------------------------------
+reboot 命令用于重启系统，输入该命令后按回车键执行即可。
+
+由于重启计算机这种操作会涉及硬件资源的管理权限，因此最好是以 root 管理员的身份
+来重启，普通用户在执行该命令时可能会被拒绝。reboot 的命令如下：
+[root@linuxprobe~]# reboot
+
+
+5.poweroff命令
+-----------------------------------
+poweroff 命令用于关闭系统，输入该命令后按回车键执行即可。
+与上面相同，该命令也会涉及硬件资源的管理权限，因此最好还是以 root 管理员的身份
+
+来关闭电脑，其命令如下：
+[root@linuxprobe~]# poweroff
+
+6.wget命令
+-----------------------------------
+wget 命令用于在终端命令行中下载网络文件，英文全称为“web get”，
+语法格式为“wget [参数] 网址”。
+
+借助于 wget 命令，可以无须打开浏览器，直接在命令行界面中就能下载文件。
+如果您没有 Linux 系统的管理经验，当前只需了解一下 wget 命令的参数以及作用，
+然后看一眼下面的演示实验就够了，切记不要急于求成。
+后面章节将逐步讲解 Linux 系统的配置管理方法，
+可以等掌握了网卡的配置方法后再来进行这个实验操作
+
+wget 命令中的参数以及作用：
+-b 后台下载模式
+-P 下载到指定目录
+-t 最大尝试次数
+-c 断点续传
+-p 下载页面内所有资源，包括图片、视频等
+-r 递归下载
+
+执行该命令后的下载效果如下：
+
+[root@linuxprobe~]# wget https://www.linuxprobe.com/docs/LinuxProbe.pdf
+--2020-09-28 19:24:39-- https://www.linuxprobe.com/docs/LinuxProbe.pdf
+Resolving www.linuxprobe.com (www.linuxprobe.com)... 221.15.64.1
+Connecting to www.linuxprobe.com (www.linuxprobe.com)|221.15.64.1|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 17676281 (17M) [application/pdf]
+Saving to: ‘LinuxProbe.pdf’
+LinuxProbe.pdf 100%[============>] 16.86M 15.9MB/s in 1.1s
+2020-09-28 19:24:40 (15.9 MB/s) - ‘LinuxProbe.pdf’saved [17676281/17676281]
+
+接下来，使用 wget 命令递归下载 www.linuxprobe.com 网站内的所有页面数据以及文件，
+下载完后会自动保存到当前路径下一个名为 www.linuxprobe.com 的目录中
+
+[root@linuxprobe~]# wget -r -p https://www.linuxprobe.com
+--2020-09-28 19:26:12-- https://www.linuxprobe.com/
+Resolving www.linuxprobe.com (www.linuxprobe.com)... 221.15.64.1
+Connecting to www.linuxprobe.com (www.linuxprobe.com)|221.15.64.1|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: unspecified [text/html]
+Saving to: ‘www.linuxprobe.com/index.html’
+………………省略下载过程………………
+
+
+7.ps命令
+-----------------------------------
+ps 命令用于查看系统中的进程状态，
+英文全称为“processes”，语法格式为“ps [参数]”。
+
+高手通常会将 ps 命令与第 3 章的管道符技术搭配使用，用来抓取与某个指
+定服务进程相对应的 PID 号码
+
+ps 命令中的参数以及作用：
+-a 显示所有进程（包括其他用户的进程）
+-u 用户以及其他详细信息
+-x 显示没有控制终端的进程
+
+ Linux 系统中有 5 种常见的进程状态，
+ 分别为运行、中断、不可中断、僵死与停止，其各自含义如下所示。
+➢ R（运行）：进程正在运行或在运行队列中等待。
+➢ S（中断）：进程处于休眠中，当某个条件形成后或者接收到信号时，则脱离该 状态。
+➢ D（不可中断）：进程不响应系统异步信号，即便用 kill 命令也不能将其中断。
+➢ Z（僵死） ：进程已经终止，但进程描述符依然存在, 直到父进程调用 wait4()系统函数后将进程释放。
+➢ T（停止）：进程收到停止信号后停止运行。
+
+除了上面 5 种常见的进程状态，还有可能是高优先级（<）、低优先级（N）、被锁进内存
+（L）、包含子进程（s）以及多线程（l）这 5 种补充形式。
+
+当执行 ps aux 表头含义：
+USER ：进程的所有者
+PID ：进程ID 号
+%CPU ：运算器占用率
+%MEM ：内存占用率
+VSZ ：虚拟内存使用量（单位是 KB）
+RSS ：占用的固定内存量（单位是KB）
+TTY ：所在终端
+STAT ：进程状态
+START ：被启动的时间
+TIME ：实际使用 CPU的时间
+COMMAND ：命令名称与参数
+
+长格式段格式
+-----------------------------------
+1.长格式和长格式之
+2.长格式和短格式之间也不能合并间不能合并
+3.但短格式和短格式之间是可以合并的，合并后仅保留一个减号（-）即可
+4.另外 ps 命令可允许参数不加减号（-），因此可直接写成 ps aux 的样子。
+
+8.pstree
+-----------------------------------
+pstree 命令用于以树状图的形式展示进程之间的关系，
+英文全称为“process tree”，输入该命令后按回车键执行即可
+
+9.top命令
+-----------------------------------
+top 命令用于动态地监视进程活动及系统负载等信息，输入该命令后按回车键执行即可。
+
+在图 2-6 中，top 命令执行结果的前 5 行为系统整体的统计信息，其所代表的含义如下。
+➢ 第 1 行：系统时间、运行时间、登录终端数、系统负载（3 个数值分别为 1 分钟、5
+分钟、15 分钟内的平均值，数值越小意味着负载越低）。
+➢ 第 2 行：进程总数、运行中的进程数、睡眠中的进程数、停止的进程数、僵死的进程数。
+➢ 第 3 行：用户占用资源百分比、系统内核占用资源百分比、改变过优先级的进程资源
+百分比、空闲的资源百分比等。其中数据均为 CPU 数据并以百分比格式显示，例如
+“99.9 id”意味着有 99.9%的 CPU 处理器资源处于空闲。
+➢ 第 4 行：物理内存总量、内存空闲量、内存使用量、作为内核缓存的内存量。
+➢ 第 5 行：虚拟内存总量、虚拟内存空闲量、虚拟内存使用量、已被提前加载的内存量。
+
+10.nice命令
+-----------------------------------
+nice 命令用于调整进程的优先级，语法格式为“nice 优先级数字 服务名称”。
+在 top 命令输出的结果中，PR 和 NI 值代表的是进程的优先级，
+数字越低（取值范围是-20～19），优先级越高。
+
+例如将 bash 服务的优先级调整到最高：
+[root@linuxprobe~]# nice -n -20 bash
+[root@linuxprobe~]#
+
+11.pidof
+-----------------------------------
+pidof 命令用于查询某个指定服务进程的 PID 号码值，
+语法格式为“pidof [参数] 服务名称”。
+
+每个进程的进程号码值（PID）是唯一的，可以用于区分不同的进程。
+
+查询本机上 sshd 服务程序的 PID：
+[root@linuxprobe~]# pidof sshd
+2156
+
+12.kill命令
+-----------------------------------
+kill 命令用于终止某个指定 PID 值的服务进程，语法格式为“kill [参数] 进程的 PID”。
+接下来，使用 kill 命令把上面用 pidof 命令查询到的 PID 所代表的进程终止掉，其命令如下所示。
+
+这种操作的效果等同于强制停止 sshd 服务。
+[root@linuxprobe~]# kill 2156
+但有时系统会提示进程无法被终止，此时可以加参数-9，表示最高级别地强制杀死进程：
+[root@linuxprobe~]# kill -9 2156
+
+13.killall命令
+-----------------------------------
+killall 命令用于终止某个指定名称的服务所对应的全部进程，
+语法格式为“killall [参数] 服务名称”。
+
+通常来讲，复杂软件的服务程序会有多个进程协同为用户提供服务，如果用 kill 命令逐
+个去结束这些进程会比较麻烦，此时可以使用 killall 命令来批量结束某个服务程序带有的全部进程。
+
+下面以 httpd 服务程序为例，来结束其全部进程：
+[root@linuxprobe~]# pidof httpd
+13581 13580 13579 13578 13577 13576
+[root@linuxprobe~]# killall httpd
+[root@linuxprobe~]# pidof httpd
+[root@linuxprobe~]#
+
+如果有些命令在执行时不断地在屏幕上输出信息，影响到后续命令的输入
+-----------------------------------
+则可以在执行命令时在末尾添加一个&符号
+
+-----------------------------------
+系统状态检测命令
+-----------------------------------
+
+1.ifconfig命令
+-----------------------------------
+ifconfig 命令用于获取网卡配置与网络状态等信息，英文全称为“interface config”，
+语法格式为“ifconfig [参数] [网络设备]”。
+
+[root@linuxprobe~]# ifconfig
+ens160: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500
+inet 192.168.10.10 netmask 255.255.255.0 broadcast 192.168.10.255
+inet6 fe80::c8f8:f5c5:8251:aeaa prefixlen 64 scopeid 0x20
+ether 00:0c:29:7d:27:bf txqueuelen 1000 (Ethernet)
+RX packets 304 bytes 33283 (32.5 KiB)
+RX errors 0 dropped 0 overruns 0 frame 0
+TX packets 91 bytes 11052 (10.7 KiB)
+TX errors 0 dropped 0 overruns 0 carrier 0 collisions 0
+lo: flags=73<UP,LOOPBACK,RUNNING> mtu 65536
+inet 127.0.0.1 netmask 255.0.0.0
+inet6 ::1 prefixlen 128 scopeid 0x10
+loop txqueuelen 1000 (Local Loopback)
+RX packets 376 bytes 31784 (31.0 KiB)
+
+2.uname命令
+-----------------------------------
+uname 命令用于查看系统内核版本与系统架构等信息，
+英文全称为“unix name”，语法格式为“uname [-a]”。
+
+在使用 uname 命令时，一般要固定搭配上-a 参数来完整地查看当前系统的
+内核名称、
+主机名、
+内核发行版本、
+节点名、
+压制时间、
+硬件名称、
+硬件平台、
+处理器类型
+以及操作系统名称等信息：
+
+[root@linuxprobe~]# uname -a
+Linux linuxprobe.com 4.18.0-80.el8.x86_64 #1 SMP Wed Mar 13 12:02:46 UTC 2019
+x86_64 x86_64 x86_64 GNU/Linux
+
+顺带一提，如果要查看当前系统版本的详细信息，则需要查看 redhat-release 文件，其命
+令以及相应的结果如下：
+
+[root@linuxprobe~]# cat /etc/redhat-release
+Red Hat Enterprise Linux release 8.0 (Ootpa)
+
+3.uptime命令
+-----------------------------------
+uptime 命令用于查看系统的负载信息，输入该命令后按回车键执行即可。
+uptime 命令真的很棒，它可以显示
+当前系统时间、
+系统已运行时间、
+启用终端数量以及
+平均负载值等信息。
+平均负载值指的是系统在最近 1 分钟、5 分钟、15 分钟内的压力情况（下
+面加粗的信息部分），负载值越低越好：
+
+[root@linuxprobe~]# uptime
+22:49:55 up 10 min, 1 users, load average: 0.01, 0.19, 0.18
+“负载值越低越好”是对运维人员来讲的，越低表示越安全省心。但是公司购置
+的硬件设备如果长期处于空闲状态，则明显是种资源浪费，老板也不会开心。所以建
+议负载值保持在 1 左右，在生产环境中不要超过 5 就好。
+
+4.free命令
+-----------------------------------
+free 命令用于显示当前系统中内存的使用量信息，语法格式为“free [-h]”。
+
+[root@linuxprobe~]# free -h
+     Total used free shared buffers buff/cache available
+Mem： 1.9Gi 1.4Gi 99Mi 20Mi 450Mi 348Mi
+Swap： 2.0Gi 80Mi 1.9Gi
+
+Total：内存总量
+used：已用量
+free：空闲量
+shared：进程功效的内存量
+buffers：磁盘缓存的内存量
+buff/cache：缓存的内存量
+available：可用内存量
+
+5.who命令
+-----------------------------------
+who 命令用于查看当前登入主机的用户终端信息，
+输入该命令后按回车键执行即可。
+
+6.last命令
+-----------------------------------
+last 命令用于调取主机的被访记录，输入该命令后按回车键执行即可。
+
+7.ping命令
+-----------------------------------
+ping 命令用于测试主机之间的网络连通性，语法格式为“ping [参数] 主机地址”。
+
+ping 命令中的参数以及作用
+-c 总共发送次数
+-l 指定网卡名称
+-I 每次间隔时间（秒）
+-W 最长等待时间（秒）
+
+我们使用 ping 命令测试一台在线的主机
+[root@linuxprobe~]# ping -c 4 192.168.10.10
+PING 192.168.10.10 (192.168.10.10) 56(84) bytes of data.
+64 bytes from 192.168.10.10: icmp_seq=1 ttl=64 time=0.155 ms
+64 bytes from 192.168.10.10: icmp_seq=2 ttl=64 time=0.110 ms
+64 bytes from 192.168.10.10: icmp_seq=3 ttl=64 time=0.112 ms
+64 bytes from 192.168.10.10: icmp_seq=4 ttl=64 time=0.209 ms
+--- 192.168.10.10 ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 56ms
+rtt min/avg/max/mdev = 0.110/0.146/0.209/0.042 ms
+
+测试一台不在线的主机
+[root@linuxprobe~]# ping -c 4 192.168.10.20
+PING 192.168.10.20 (192.168.10.20) 56(84) bytes of data.
+From 192.168.10.10 icmp_seq=1 Destination Host Unreachable
+From 192.168.10.10 icmp_seq=2 Destination Host Unreachable
+From 192.168.10.10 icmp_seq=3 Destination Host Unreachable
+From 192.168.10.10 icmp_seq=4 Destination Host Unreachable
+--- 192.168.10.20 ping statistics ---
+4 packets transmitted, 0 received, +4 errors, 100% packet loss, time 68ms
+pipe 4
+
+8.tracepath
+-----------------------------------
+tracepath 命令用于显示数据包到达目的主机时途中经过的所有路由信息，
+语法格式为“tracepath [参数] 域名”。
+
+当两台主机之间无法正常 ping 通时，要考虑两台主机之间是否有错误的路由信息，
+导致数据被某一台设备错误地丢弃
+
+。这时便可以使用 tracepath 命令追踪数据包到达目的主机时途
+中的所有路由信息，以分析是哪台设备出了问题。下面的情况就很清晰了
+
+9.netsatt命令
+-----------------------------------
+netstat 命令用于显示如网络连接、路由表、接口状态等的网络相关信息，
+英文全称为“network status”，语法格式为“netstat [参数]”
+
+netstat 命令中的参数以及作用：
+-a 显示所有连接中的 Socket
+-p 显示正在使用的 Socket 信息
+-t 显示 TCP 协议的连接状态
+-u 显示 UDP 协议的连接状态
+
+-n 使用 IP 地址，不使用域名
+-l 仅列出正在监听的服务状态
+-i 现在网卡列表信息
+-r 显示路由表信息
+
+10.history命令
+-----------------------------------
+history 命令用于显示执行过的命令历史，语法格式为“history [-c]”。
+
+历史命令会被保存到用户家目录中的.bash_history 文件中。Linux 系统中以点（.）开头的
+文件均代表隐藏文件，这些文件大多数为系统服务文件，可以用 cat 命令查看其文件内容：
+[root@linuxprobe~]# cat ~/.bash_history
+
+要清空当前用户在本机上执行的 Linux 命令历史记录信息，可执行如下命令：
+[root@linuxprobe~]# history -c
+
+11.sosreport 命令
+-----------------------------------
+sosreport 命令用于收集系统配置及架构信息并输出诊断文档，输入该命令后按回车键执行即可。
+
+sosreport 命令有点像是远程问诊。假如我们今天有点咳嗽发烧不舒服，可以先从
+网上搜索相关症状的病因，如果仅仅是感冒的话那就多喝水，这就免去了到医院挂号
+看病的车马劳顿；而如果怀疑出了大毛病，再请专业人员进行处理也不迟。
+
+-----------------------------------
+查找定位文件命令
+-----------------------------------
+
+1.pwd命令
+-----------------------------------
+pwd 命令用于显示用户当前所处的工作目录，
+英文全称为“print working directory”，输入该命令后按回车键执行即可。
+
+[root@linuxprobe etc]# pwd
+/etc
+
+2.cd命令
+-----------------------------------
+cdcd 命令用于切换当前的工作路径，英文全称为“change directory”，
+语法格式为“cd [参数] [目录]”。
+
+这个命令应该是最常用的一个 Linux 命令了
+“cd -”命令返回到上一次所处的目录
+“cd..”命令进入上级目录
+“cd～username”命令切换到其他用户的家目录
+
+例如，使用下述的 cd 命令切换进/etc 目录中：
+[root@linuxprobe~]# cd /etc
+
+同样的道理，可使用下述命令切换到/bin 目录中：
+[root@linuxprobe etc]# cd /bin
+
+此时，要返回到上一次的目录（即/etc 目录），可执行如下命令：
+[root@linuxprobe bin]# cd -
+/etc
+[root@linuxprobe etc]#
+
+还可以通过下面的命令快速切换到用户的家目录：
+[root@linuxprobe etc]# cd~
+[root@linuxprobe~]#
+
+3.ls命令
+-----------------------------------
+ls 命令用于显示目录中的文件信息，
+英文全称为“list”，语法格式为“ls [参数] [文件名称]”。
+
+使用 ls 命令的-a 参数可以看到全部文件（包括隐藏文件），
+使用-l 参数可以查看文件的属性、大小等详细信息。
+[root@linuxprobe~]# ls -al
+total 48
+dr-xr-x---. 15 root root 4096 Jul 24 06:33 .
+dr-xr-xr-x. 17 root root 224 Jul 21 05:04 ..
+-rw-------. 1 root root 1407 Jul 21 05:09 anaconda-ks.cfg
+-rw-------. 1 root root 335 Jul 24 06:33 .bash_history
+-rw-r--r--. 1 root root 18 Aug 13 2018 .bash_logout
+-rw-r--r--. 1 root root 176 Aug 13 2018 .bash_profile
+-rw-r--r--. 1 root root 176 Aug 13 2018 .bashrc
+drwx------. 10 root root 230 Jul 21 05:19 .cache
+drwx------. 11 root root 215 Jul 24 06:27 .config
+-rw-r--r--. 1 root root 100 Aug 13 2018 .cshrc
+drwx------. 3 root root 25 Jul 21 05:16 .dbus
+drwxr-xr-x. 2 root root 6 Jul 21 05:19 Desktop
+
+如果想要查看目录属性信息，则需要额外添加一个-d 参数
+/etc 目录的权限与属性信息：
+
+[root@linuxprobe~]# ls -ld /etc
+drwxr-xr-x. 132 root root 8192 Jul 10 10:48 /etc
+
+4.tree命令
+-----------------------------------
+tree 命令用于以树状图的形式列出目录内容及结构，输入该命令后按回车键执行即可。
+
+我们来对比一下两者的区别。
+使用 ls 命令查看目录内的文件：
+[root@linuxprobe~]# ls
+A Desktop Downloads Music Public Videos
+anaconda-ks.cfg Documents initial-setup-ks.cfg Pictures Templates
+
+使用 tree 命令查看目录内文件名称以及结构：
+[root@linuxprobe~]# tree
+.
+├──A
+│ └──B
+│ └──C
+├──anaconda-ks.cfg
+├──Desktop
+├──Documents
+├──Downloads
+├──initial-setup-ks.cfg
+├──Music
+├──Pictures
+
+5.find命令
+-----------------------------------
+find 命令用于按照指定条件来查找文件所对应的位置，
+语法格式为“find [查找范围] 寻找条件”。
+
+find 命令中的参数以及作用
+-name 匹配名称
+-perm 匹配权限（mode 为完全匹配，-mode 为包含即可）
+-user 匹配所有者
+-group 匹配所属组
+-mtime -n +n 匹配修改内容的时间（-n 指 n 天以内，+n 指 n 天以前）
+-atime -n +n 匹配访问文件的时间（-n 指 n 天以内，+n 指 n 天以前）
+-ctime -n +n 匹配修改文件权限的时间（-n 指 n 天以内，+n 指 n 天以前）
+-nouser 匹配无所有者的文件
+-nogroup 匹配无所属组的文件
+-newer f1 !f2 匹配比文件 f1 新但比 f2 旧的文件
+--type b/d/c/p/l/f 匹配文件类型
+（后面的字母依次表示块设备、目录、字符设备、管道、链接文件、文本文件）
+-size 匹配文件的大小（+50KB为查找超过50KB的文件，而-50KB为查找小于50KB的文件）
+-prune 忽略某个目录
+-exec…… {}\; 后面可跟用于进一步处理搜索结果的命令（下文会有演示）
+
+
+
+如果要想获取该目录中所有以 host 开头的文件列表，可以执行如下命令：
+
+[root@linuxprobe~]# find /etc -name "host*"
+/etc/host.conf
+/etc/hosts
+/etc/hosts.allow
+/etc/hosts.deny
+/etc/avahi/hosts
+/etc/hostname
+
+如果要在整个系统中搜索权限中包括 SUID 
+权限的所有文件（详见第 5 章），只需使用-4000 即可：
+
+[root@linuxprobe~]# find / -perm -4000 -print
+/usr/bin/fusermount
+/usr/bin/chage
+/usr/bin/gpasswd
+/usr/bin/newgrp
+/usr/bin/umount
+/usr/bin/mount
+/usr/bin/su
+/usr/bin/pkexec
+/usr/bin/crontab
+/usr/bin/passwd
+………………省略部分输出信息………………
+
+6.locate命令
+-----------------------------------
+locate 命令用于按照名称快速搜索文件所对应的位置，
+语法格式为“locate 文件名称”。
+
+第一次使用locate 命令之前，记得先执行updatedb 命令来生成索引数据库，然后再进行查找：
+
+[root@linuxprobe~]# updatedb
+[root@linuxprobe~]# ls -l /var/lib/mlocate/mlocate.db
+-rw-r-----. 1 root slocate 295917 Sep 13 17:54 /var/lib/mlocate/mlocate.db
+
+使用 locate 命令搜索出所有包含“whereis”名称的文件所在的位置：
+
+[root@linuxprobe~]# locate whereis
+/usr/bin/whereis
+/usr/share/bash-completion/completions/whereis
+/usr/share/man/man1/whereis.1.gz
+
+7.whereis 命令
+-----------------------------------
+whereis 命令用于按照名称快速搜索二进制程序（命令）、源代码以及帮助文件所对应的位置，
+语法格式为“whereis 命令名称”。
+
+whereis 命令也是基于 updatedb 命令所生成的索引库文件进行搜索，
+
+它与 locate命令的区别是不关心那些相同名称的文件，仅仅是快速找到对应的命令文件及其帮助文件所
+在的位置。
+
+下面使用 whereis 命令分别查找出 ls 和 pwd 命令所在的位置：
+[root@linuxprobe~]# whereis ls
+ls: /usr/bin/ls /usr/share/man/man1/ls.1.gz /usr/share/man/man1p/ls.1p.gz
+[root@linuxprobe~]# whereis pwd
+pwd: /usr/bin/pwd /usr/share/man/man1/pwd.1.gz /usr/share/man/man1p/pwd.1p.gz
+
+8.which命令
+-----------------------------------
+which 命令用于按照指定名称快速搜索二进制程序（命令）所对应的位置，
+语法格式为“which 命令名称”。
+
+which 命令是在 PATH 变量所指定的路径中，按照指定条件搜索命令所在的路径。
+也就是说，如果我们既不关心同名文件（find 与 locate）
+也不关心命令所对应的源代码和帮助文件（whereis）
+仅仅是想找到命令本身所在的路径
+
+[root@linuxprobe~]# which locate
+/usr/bin/locate
+[root@linuxprobe~]# which whereis
+/usr/bin/whereis
+
+-----------------------------------
+文本文件编辑命令
+-----------------------------------
+
+1.cat命令
+-----------------------------------
+cat 命令用于查看纯文本文件（内容较少的），
+英文全称为“concatenate”，语法格式为“cat [参数] 文件名称”。
+
+如果在查看文本内容时还想顺便显示行号的话，不妨在 cat 命令后面追加一个-n 参数：
+[root@linuxprobe~]# cat -n initial-setup-ks.cfg
+1 #version=RHEL8
+2 # X Window System configuration information
+3 xconfig --startxonboot
+4 # License agreement
+5 eula --agreed
+6 # Use graphical install
+7 graphical
+8 # Network information
+9 network --bootproto=dhcp --device=ens160 --onboot=off --ipv6=auto --
+no-activate
+10 network --bootproto=dhcp --hostname=localhost.localdomain
+11 repo --name="AppStream" --baseurl=file:///run/install/repo/AppStream
+12 ignoredisk --only-use=sda
+13 # Use CDROM installation media
+14 cdrom
+15 # Run the Setup Agent on first boot
+16 firstboot --enable
+17 # System services
+………………省略部分输出信息………………
+
+2.more命令
+-----------------------------------
+more 命令用于查看纯文本文件（内容较多的），语法格式为“more [参数] 文件名称”。
+
+还可以使用空格键或回车键向下翻页
+
+[root@linuxprobe~]# more initial-setup-ks.cfg
+#version=RHEL8
+# X Window System configuration information
+xconfig --startxonboot
+# License agreement
+eula --agreed
+# Use graphical install
+graphical
+
