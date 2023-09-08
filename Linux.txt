@@ -1818,3 +1818,223 @@ Host 192.168.10.20 is Off-line.
 
 多分支结构由 if、then、else、elif、fi 关键词组成
 -----------------------------------
+[root@linuxprobe~]# vim chkscore.sh
+#!/bin/bash
+read -p "Enter your score（0-100）：" GRADE
+if [ $GRADE -ge 85 ] && [ $GRADE -le 100 ] ; then
+echo "$GRADE is Excellent"
+elif [ $GRADE -ge 70 ] && [ $GRADE -le 84 ] ; then
+echo "$GRADE is Pass"
+else
+echo "$GRADE is Fail"
+fi
+[root@linuxprobe~]# bash chkscore.sh
+Enter your score（0-100）：88
+88 is Excellent
+[root@linuxprobe~]# bash chkscore.sh
+Enter your score（0-100）：80
+80 is Pass
+
+下面执行该脚本。当用户输入的分数分别为 30 和 200 时，其结果如下：
+[root@linuxprobe~]# bash chkscore.sh
+Enter your score（0-100）：30
+30 is Fail
+[root@linuxprobe~]# bash chkscore.sh
+Enter your score（0-100）：200
+200 is Fail
+
+for 条件循环语句
+-----------------------------------
+for 变量 in 取值列表
+do
+	命令序列
+done
+
+
+读者可以自行决定具体的用户名称和个数：
+[root@linuxprobe~]# vim users.txt
+andy
+barry
+carl
+duke
+eric
+george
+
+接下来编写 Shell 脚本 addusers.sh
+[root@linuxprobe~]# vim addusers.sh
+#!/bin/bash
+read -p "Enter The Users Password : " PASSWD
+for UNAME in `cat users.txt`
+do
+	id $UNAME &> /dev/null
+	if [ $? -eq 0 ]
+	then
+		echo "$UNAME , Already exists"
+	else
+		useradd $UNAME &> /dev/null
+		echo "$PASSWD" | passwd --stdin $UNAME &> /dev/null
+		echo "$UNAME , Create success"
+	fi
+done
+
+看其中是否有这些新创建的用户信息：
+[root@linuxprobe~]# bash addusers.sh
+Enter The Users Password : linuxprobe
+andy , Create success
+barry , Create success
+carl , Create success
+duke , Create success
+eric , Create success
+george , Create success
+[root@linuxprobe~]# tail -6 /etc/passwd
+andy:x:1001:1001::/home/andy:/bin/bash
+barry:x:1002:1002::/home/barry:/bin/bash
+carl:x:1003:1003::/home/carl:/bin/bash
+duke:x:1004:1004::/home/duke:/bin/bash
+eric:x:1005:1005::/home/eric:/bin/bash
+george:x:1006:1006::/home/george:/bin/bash
+
+首先创建一个主机列表文件 ipaddrs.txt：
+[root@linuxprobe~]# vim ipaddrs.txt
+192.168.10.10
+192.168.10.11
+192.168.10.12
+
+while 条件循环语句
+-----------------------------------
+while 条件测试操作
+do
+	命令序列
+done
+
+
+[root@linuxprobe~]# vim Guess.sh
+#!/bin/bash
+PRICE=$(expr $RANDOM % 1000)
+TIMES=0
+echo "商品实际价格为 0-999 之间，猜猜看是多少？"
+while true
+do
+	read -p "请输入您猜测的价格数目：" INT
+	let TIMES++
+	if [ $INT -eq $PRICE ] ; then
+		echo "恭喜您答对了，实际价格是 $PRICE"
+		echo "您总共猜测了 $TIMES 次"
+		exit
+	elif [ $INT -gt $PRICE ] ; then
+		echo "太高了！"
+	else
+		echo "太低了！"
+	fi
+done
+
+case 条件测试语句
+-----------------------------------
+如果数据不在所列出的范围内，
+则会去执行星号（*）中所定义的默认命令
+
+case 变量 in
+模式1）
+	命令序列1
+	;;
+模式2）
+	命令序列2
+	;;
+	....
+	*)
+	默认命令序列
+esac
+
+计划任务服务程序
+-----------------------------------
+➢ 一次性计划任务：今晚 23:30 重启网站服务。
+➢ 长期性计划任务：每周一的凌晨 3:25 把/home/wwwroot 
+目录打包备份为 backup.tar.gz。
+
+at命令中的参数及其作用:
+-f 指定包含命令的任务文件
+-q 指定新任务名称
+-l 显示待执行任务的列表
+-d 删除指定的待执行任务
+-m 任务执行后向用户发邮件
+
+[root@linuxprobe~]# at 23:30
+warning: commands will be executed using /bin/sh
+at> systemctl restart httpd
+at> 此处请同时按下<Ctrl>+<d>组合键来结束编写计划任务
+job 1 at Wed Oct 14 23:30:00 2020
+[root@linuxprobe~]# at -l
+1 Wed Oct 14 23:30:00 2020 a root
+
+
+一次性计划任务只执行一次
+可以用 at 命令实现这种功能，
+只需要写成“at 时间”的形式就行
+at 命令中的参数及其作用
+-f 指定包含命令的任务文件
+-q 指定新任务名称
+-l 显示待执行任务的列表
+-d 删除指定的待执行任务
+-m 任务执行后向用户发邮件
+
+[root@linuxprobe~]# at 23:30
+warning: commands will be executed using /bin/sh
+at> systemctl restart httpd
+at> 此处请同时按下<Ctrl>+<d>组合键来结束编写计划任务
+job 1 at Wed Oct 14 23:30:00 2020
+[root@linuxprobe~]# at -l
+1 Wed Oct 14 23:30:00 2020 a root
+
+让 at 命令接收前面 echo 命令的输出信息
+以达到通过非交互式的方式创建计划一次性任务的目的
+
+[root@linuxprobe~]# echo "systemctl restart httpd" | at 23:30
+warning: commands will be executed using /bin/sh
+job 2 at Wed Oct 14 23:30:00 2020
+[root@linuxprobe~]# at -l
+1 Wed Oct 14 23:30:00 2020 a root
+2 Wed Oct 14 23:30:00 2020 a root
+
+可以使用 atrm 命令轻松删除其中一条：
+[root@linuxprobe~]# atrm 2
+[root@linuxprobe~]# at -l
+1 Wed Oct 14 23:30:00 2020 a root
+
+激活该脚本后再开始倒计时执行
+
+at now +2 MINUTE
+ 分钟（MINUTE）后执行这个任务
+ 成小时（HOUR）
+ 日（DAY）
+ 月（MONTH）
+ 
+[root@linuxprobe~]# at now +2 MINUTE
+warning: commands will be executed using /bin/sh
+at> systemctl restart httpd
+at> 此处请同时按下<Ctrl>+<d>键来结束编写计划任务
+job 3 at Wed Oct 14 22:50:00 2020
+
+
+够周期性地、有规律地执行某些具体的任务
+crontab 命令中的参数及其作用:
+-e 编辑计划任务
+-u 指定用户名称
+-l 列出任务列表
+-r 删除计划任务
+
+使用 crond 设置任务的参数字段说明:
+分钟 取值为 0～59 的整数
+小时 取值为 0～23 的任意整数
+日期 取值为 1～31 的任意整数
+月份 取值为 1～12 的任意整数
+星期 取值为 0～7 的任意整数，其中 0 与 7 均为星期日
+命令 要执行的命令或程序脚本
+
+[root@linuxprobe~]# crontab -e
+no crontab for root - using an empty one
+crontab: installing new crontab
+[root@linuxprobe~]# crontab -l
+25 3 * * 1,3,5 /usr/bin/tar -czvf backup.tar.gz /home/wwwroot
+
+
+
