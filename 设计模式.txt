@@ -155,6 +155,129 @@ class Singleton {
 	}
 }
 
+3) 懒汉式（线程不安全）
+---------------------------
+class Singleton {
+	private static Singleton instance;
+	
+	private Singleton() {}
+	
+	//提供一个静态的公有方法，当使用到该方法时，才去创建 instance
+	//即懒汉式
+	public static Singleton getInstance() {
+		if(instance == null) {
+			instance = new Singleton();
+		}
+		return instance;
+	}
+}
+
+4) 懒汉式（线程安全，同步方法）
+---------------------------
+效率底，不推荐
+class Singleton {
+	private static Singleton instance;
+	
+	private Singleton() {}
+	
+	//提供一个静态的公有方法，加入同步处理的代码，解决线程安全问题
+	//即懒汉式
+	public static synchronized Singleton getInstance() {
+		if(instance == null) {
+			instance = new Singleton();
+		}
+		return instance;
+	}
+}
+
+5) 懒汉式（线程安全，同步代码块）
+---------------------------
+class Singleton{
+    private static Singleton instance;
+
+    private Singleton() {
+    }
+	//新手常这么写，这里的线程是不安全的
+    public static Singleton getInstance() {
+        if(instance == null){
+            synchronized (Singleton.class){
+                instance = new Singleton();
+            }
+        }
+        return instance;
+    }
+}
+
+6) 双重检查（推荐使用）
+---------------------------
+// 懒汉式(线程安全，双重检查 同步方法)
+class Singleton {
+	private static volatile Singleton instance;
+	
+	private Singleton() {}
+	
+	//提供一个静态的公有方法，加入双重检查代码，解决线程安全问题, 同时解决懒加载问题
+	//同时保证了效率, 推荐使用
+	
+	public static synchronized Singleton getInstance() {
+		if(instance == null) {
+			synchronized (Singleton.class) {
+				if(instance == null) {
+					instance = new Singleton();
+				}
+			}
+			
+		}
+		return instance;
+	}
+}
+
+
+7) 静态内部类
+---------------------------
+// 静态内部类完成， 推荐使用
+class Singleton {
+	
+	//构造器私有化
+	private Singleton() {}
+	
+	//写一个静态内部类,该类中有一个静态属性 Singleton
+	private static class SingletonInstance {
+		private static final Singleton INSTANCE = new Singleton(); 
+	}
+	
+	//提供一个静态的公有方法，直接返回SingletonInstance.INSTANCE
+	
+	public static  Singleton getInstance() {
+		
+		return SingletonInstance.INSTANCE;
+	}
+}
+
+这种方式采用了类装载的机制来保证初始化实例时只有一个线程
+静态内部类方式在被装载时并不会立即实例化，而是在需要实例化
+
+
+
+8) 枚举
+---------------------------
+这借助 JDK 巧中添加的枚举来实现单例模式。不仅能避免多线程同步问题，而且还能防止反序列化重新创建
+public class SingletonTest08 {
+	public static void main(String[] args) {
+		Singleton instance = Singleton.INSTANCE;
+		// 这里直接调用方法，跳跳道路通罗马呀
+		instance.sayOK();
+	}
+}
+
+//使用枚举，可以实现单例, 推荐
+enum Singleton {
+	INSTANCE; //属性
+	public void sayOK() {
+		System.out.println("ok~");
+	}
+}
+
 工厂模式（至少能说出来）
 ---------------------------
 1.简单工厂模式
