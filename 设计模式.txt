@@ -712,3 +712,193 @@ public class HouseDirector {
 	
 	
 }
+
+---------------------------
+结构模式
+---------------------------
+
+适配器模式
+---------------------------
+主的目的是兼容性，让原本因接口不匹配不能一起工作的两个类可以协同工作。
+其别名为包装器（ Wrapper ）
+
+主要分为三类：类适配器模式、对象适配器模式、接口适配器模式
+
+---------------------------
+类适配器
+---------------------------
+
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		System.out.println(" === 类适配器模式 ====");
+		Phone phone = new Phone();
+		phone.charging(new VoltageAdapter());
+	}
+
+}
+
+---------------------------
+//适配接口
+public interface IVoltage5V {
+	public int output5V();
+}
+
+
+---------------------------
+//被适配的类
+public class Voltage220V {
+	//输出220V的电压
+	public int output220V() {
+		int src = 220;
+		System.out.println("电压=" + src + "伏");
+		return src;
+	}
+}
+
+---------------------------
+//适配器类
+public class VoltageAdapter extends Voltage220V implements IVoltage5V {
+
+	@Override
+	public int output5V() {
+		// TODO Auto-generated method stub
+		//获取到220V电压
+		int srcV = output220V();
+		int dstV = srcV / 44 ; //转成 5v
+		return dstV;
+	}
+
+}
+
+---------------------------
+手机
+public class Phone {
+
+	//充电
+	public void charging(IVoltage5V iVoltage5V) {
+		if(iVoltage5V.output5V() == 5) {
+			System.out.println("电压为5V, 可以充电~~");
+		} else if (iVoltage5V.output5V() > 5) {
+			System.out.println("电压大于5V, 不能充电~~");
+		}
+	}
+}
+
+对象适配器模式
+---------------------------
+根据“合成复用原则，在系统中尽量使用关联关系（聚合）来替代继承关系。
+对象适配器模式是适配器模式常用的一种
+
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		System.out.println(" === 对象适配器模式 ====");
+		Phone phone = new Phone();
+		phone.charging(new VoltageAdapter(new Voltage220V()));
+	}
+
+}
+
+---------------------------
+//适配接口
+public interface IVoltage5V {
+	public int output5V();
+}
+
+---------------------------
+//适配器类
+public class VoltageAdapter  implements IVoltage5V {
+
+	private Voltage220V voltage220V; // 关联关系-聚合
+	
+	//通过构造器，传入一个 Voltage220V 实例
+	public VoltageAdapter(Voltage220V voltage220v) {
+		
+		this.voltage220V = voltage220v;
+	}
+
+	@Override
+	public int output5V() {
+		
+		int dst = 0;
+		if(null != voltage220V) {
+			int src = voltage220V.output220V();//获取220V 电压
+			System.out.println("使用对象适配器，进行适配~~");
+			dst = src / 44;
+			System.out.println("适配完成，输出的电压为=" + dst);
+		}
+		
+		return dst;
+		
+	}
+
+}
+
+---------------------------
+//被适配的类
+public class Voltage220V {
+	//输出220V的电压
+	public int output220V() {
+		int src = 220;
+		System.out.println("电压=" + src + "伏");
+		return src;
+	}
+}
+
+接口适配器模式
+---------------------------
+1) 一些书籍称为：适配器模式 (Default Adapter pattern ）或缺省适配器模式
+2) 核心思路：当不需要全部实现接口提供的方法时，可先设计一个抽象类实现接口，
+	并为该接口中每个方法提供一个默认实现（空方法），
+	那么该抽象类的子类可有选择地覆盖父类的某些方法来实现需求
+
+	
+public class Client {
+	public static void main(String[] args) {
+		
+		AbsAdapter absAdapter = new AbsAdapter() {
+			//只需要去覆盖我们 需要使用 接口方法
+			@Override
+			public void m1() {
+				// TODO Auto-generated method stub
+				System.out.println("使用了m1的方法");
+			}
+		};
+		
+		absAdapter.m1();
+	}
+}
+
+
+---------------------------
+public interface Interface4 {
+	public void m1();
+	public void m2();
+	public void m3();
+	public void m4();
+}
+
+---------------------------
+//在AbsAdapter 我们将 Interface4 的方法进行默认实现
+public abstract class AbsAdapter implements Interface4 {
+
+	//默认实现
+	public void m1() {
+
+	}
+
+	public void m2() {
+
+	}
+
+	public void m3() {
+
+	}
+
+	public void m4() {
+
+	}
+}
