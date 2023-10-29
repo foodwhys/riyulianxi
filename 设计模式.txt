@@ -902,3 +902,21 @@ public abstract class AbsAdapter implements Interface4 {
 
 	}
 }
+
+---------------------------
+桥接模式
+---------------------------
+遇到问题：
+l) 扩展性问题（类爆炸）
+2) 违反单一职责问题
+解决：
+l) 桥接模式 (Brldge 模式）是指：将实现与抽象放在两个不同的类层次中，使两个层次可以独立改变。
+   特点是把抽象 (Abstraction) 与行为实现 (lmplementation) 分离开来，
+   从而可以保持各部分的独立性以及应对他们的功能扩展
+
+l) Client 类：桥接模式的调用者
+2) 抽象类 (Abstraction) ：维护了 lmplementor即它的实现类 ConcreteImplementorA.
+	二者是聚合关系，Abstraction充当桥接类
+3) RefinedAbstraction ：是 Abstracuon 抽象类的子类	
+4) lmplementor :行为实现类的接口
+5 ） ConcreteImplementorA /B ：行为的具体实现类
