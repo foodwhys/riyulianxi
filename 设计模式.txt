@@ -575,3 +575,140 @@ public class DeepProtoType implements Serializable, Cloneable{
 	}
 	
 }
+
+
+建造者模式
+---------------------------
+Builder Pattern叫生成器模式，是一种对象构建模式它可以将复杂对象的建造过程抽象出来
+
+
+l) Product （产品角色）:一个具体的产品对象。
+2) Builder （抽象建造者）：创建一个 Product 对象的各个部件指定的接口啪象类。
+3) ConcreteBuilder （具体建造者）：实现接口，构建和装配各个部件。
+4) Director （指挥者）：构建一个使用 Builder 接口的对象。
+   一是：隔离了客户与对象的生产过程
+   二是：负责控制产品对象的生产过程。
+   
+public class Client {
+	public static void main(String[] args) {
+		
+		//盖普通房子
+		CommonHouse commonHouse = new CommonHouse();
+		//准备创建房子的指挥者
+		HouseDirector houseDirector = new HouseDirector(commonHouse);
+		
+		//完成盖房子，返回产品(普通房子)
+		House house = houseDirector.constructHouse();
+		
+		//System.out.println("输出流程");
+		
+		System.out.println("--------------------------");
+		//盖高楼
+		HighBuilding highBuilding = new HighBuilding();
+		//重置建造者
+		houseDirector.setHouseBuilder(highBuilding);
+		//完成盖房子，返回产品(高楼)
+		houseDirector.constructHouse();
+	}
+}
+
+l) Product （产品角色）:一个具体的产品对象。
+---------------------------
+public class House {
+	private String baise;
+	private String wall;
+	private String roofed;
+	public String getBaise() {
+		return baise;
+	}
+	public void setBaise(String baise) {
+		this.baise = baise;
+	}
+	public String getWall() {
+		return wall;
+	}
+	public void setWall(String wall) {
+		this.wall = wall;
+	}
+	public String getRoofed() {
+		return roofed;
+	}
+	public void setRoofed(String roofed) {
+		this.roofed = roofed;
+	}
+	
+}
+
+2) Builder （抽象建造者）：创建一个 Product 对象的各个部件指定的接口啪象类。
+---------------------------
+// 抽象的建造者
+public abstract class HouseBuilder {
+
+	protected House house = new House();
+	
+	//将建造的流程写好, 抽象的方法
+	public abstract void buildBasic();
+	public abstract void buildWalls();
+	public abstract void roofed();
+	
+	//建造房子好， 将产品(房子) 返回
+	public House buildHouse() {
+		return house;
+	}
+	
+}
+
+3) ConcreteBuilder （具体建造者）：实现接口，构建和装配各个部件。
+---------------------------
+HouseBuilder的实现
+public class CommonHouse extends HouseBuilder {
+
+	@Override
+	public void buildBasic() {
+		// TODO Auto-generated method stub
+		System.out.println(" 普通房子打地基5米 ");
+	}
+
+	@Override
+	public void buildWalls() {
+		// TODO Auto-generated method stub
+		System.out.println(" 普通房子砌墙10cm ");
+	}
+
+	@Override
+	public void roofed() {
+		// TODO Auto-generated method stub
+		System.out.println(" 普通房子屋顶 ");
+	}
+
+}
+
+4) Director （指挥者）：构建一个使用 Builder 接口的对象。
+   一是：隔离了客户与对象的生产过程
+   二是：负责控制产品对象的生产过程。
+---------------------------
+//指挥者，这里去指定制作流程，返回产品
+public class HouseDirector {
+	
+	HouseBuilder houseBuilder = null;
+
+	//构造器传入 houseBuilder
+	public HouseDirector(HouseBuilder houseBuilder) {
+		this.houseBuilder = houseBuilder;
+	}
+
+	//通过setter 传入 houseBuilder
+	public void setHouseBuilder(HouseBuilder houseBuilder) {
+		this.houseBuilder = houseBuilder;
+	}
+	
+	//如何处理建造房子的流程，交给指挥者
+	public House constructHouse() {
+		houseBuilder.buildBasic();
+		houseBuilder.buildWalls();
+		houseBuilder.roofed();
+		return houseBuilder.buildHouse();
+	}
+	
+	
+}
