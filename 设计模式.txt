@@ -2248,3 +2248,268 @@ public class Fail extends Action {
 3) Aggregate ：一个统一的聚合接口，将客户端和具体聚合解耦
 4) ConcreteAggreage ：具体的聚合持有对象集合，并提供一个方法，返回一个迭代器，该迭代器可以正确遍历集合
 5) Client ：客户端，通过Iterator 和 Aggregate 依赖子类
+
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//创建学院
+		List<College> collegeList = new ArrayList<College>();
+		
+		ComputerCollege computerCollege = new ComputerCollege();
+		InfoCollege infoCollege = new InfoCollege();
+		
+		collegeList.add(computerCollege);
+		//collegeList.add(infoCollege);
+		
+		OutPutImpl outPutImpl = new OutPutImpl(collegeList);
+		outPutImpl.printCollege();
+	}
+
+}
+
+
+---------------------------
+public class ComputerCollegeIterator implements Iterator {
+
+	//这里我们需要Department 是以怎样的方式存放=>数组
+	Department[] departments;
+	int position = 0; //遍历的位置
+	
+	
+	
+	
+	public ComputerCollegeIterator(Department[] departments) {
+		this.departments = departments;
+	}
+
+	//判断是否还有下一个元素
+	@Override
+	public boolean hasNext() {
+		// TODO Auto-generated method stub
+		if(position >= departments.length || departments[position] == null) {
+			return false;
+		}else {
+		
+			return true;
+		}
+	}
+
+	@Override
+	public Object next() {
+		// TODO Auto-generated method stub
+		Department department = departments[position];
+		position += 1;
+		return department;
+	}
+	
+	//删除的方法，默认空实现
+	public void remove() {
+		
+	}
+
+}
+
+---------------------------
+public class OutPutImpl {
+	
+	//学院集合
+	List<College> collegeList;
+
+	public OutPutImpl(List<College> collegeList) {
+		
+		this.collegeList = collegeList;
+	}
+	//遍历所有学院,然后调用printDepartment 输出各个学院的系
+	public void printCollege() {
+		
+		//从collegeList 取出所有学院, Java 中的 List 已经实现Iterator
+		Iterator<College> iterator = collegeList.iterator();
+		
+		while(iterator.hasNext()) {
+			//取出一个学院
+			College college = iterator.next();
+			System.out.println("=== "+college.getName() +"=====" );
+			printDepartment(college.createIterator()); //得到对应迭代器
+		}
+	}
+	
+	
+	//输出 学院输出 系
+	
+	public void printDepartment(Iterator iterator) {
+		while(iterator.hasNext()) {
+			Department d = (Department)iterator.next();
+			System.out.println(d.getName());
+		}
+	}
+	
+}
+
+
+---------------------------
+观察者模式
+---------------------------
+1) 观察者模式类似订牛奶业务
+2）奶站/气象局： Subject
+3) 用户／第三方网站： Observer
+
+
+Subject ：登记注册、移除和通知
+1) registerObserver 注册
+2) removeObserver 移除
+3) notifyObservers() 通知所有的注册的用户，
+   根据不同需求，可以是更新数据，让用户来取，也可能是实施推送，看具体需求定
+   
+Observer ：接收输入
+
+对象之间多对一依赖的一种设计方案，被依赖的对象为 Subject ，依赖的对象为 Observer ， Subject通知变化，
+比如这里的奶站是 Subject ，是 1 的一方。用户 Observer ，是多的一方。
+
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//创建一个WeatherData
+		WeatherData weatherData = new WeatherData();
+		
+		//创建观察者
+		CurrentConditions currentConditions = new CurrentConditions();
+		BaiduSite baiduSite = new BaiduSite();
+		
+		//注册到weatherData
+		weatherData.registerObserver(currentConditions);
+		weatherData.registerObserver(baiduSite);
+		
+		//测试
+		System.out.println("通知各个注册的观察者, 看看信息");
+		weatherData.setData(10f, 100f, 30.3f);
+		
+		
+		weatherData.removeObserver(currentConditions);
+		//测试
+		System.out.println();
+		System.out.println("通知各个注册的观察者, 看看信息");
+		weatherData.setData(10f, 100f, 30.3f);
+	}
+
+}
+
+
+---------------------------
+//接口, 让WeatherData 来实现 
+public interface Subject {
+	
+	public void registerObserver(Observer o);
+	public void removeObserver(Observer o);
+	public void notifyObservers();
+}
+
+---------------------------
+/**
+ * 类是核心
+ * 1. 包含最新的天气情况信息 
+ * 2. 含有 观察者集合，使用ArrayList管理
+ * 3. 当数据有更新时，就主动的调用   ArrayList, 通知所有的（接入方）就看到最新的信息
+ * @author Administrator
+ *
+ */
+public class WeatherData implements Subject {
+	private float temperatrue;
+	private float pressure;
+	private float humidity;
+	//观察者集合
+	private ArrayList<Observer> observers;
+	
+	//加入新的第三方
+
+	public WeatherData() {
+		observers = new ArrayList<Observer>();
+	}
+
+	public float getTemperature() {
+		return temperatrue;
+	}
+
+	public float getPressure() {
+		return pressure;
+	}
+
+	public float getHumidity() {
+		return humidity;
+	}
+
+	public void dataChange() {
+		//调用 接入方的 update
+		
+		notifyObservers();
+	}
+
+	//当数据有更新时，就调用 setData
+	public void setData(float temperature, float pressure, float humidity) {
+		this.temperatrue = temperature;
+		this.pressure = pressure;
+		this.humidity = humidity;
+		//调用dataChange， 将最新的信息 推送给 接入方 currentConditions
+		dataChange();
+	}
+
+	//注册一个观察者
+	@Override
+	public void registerObserver(Observer o) {
+		// TODO Auto-generated method stub
+		observers.add(o);
+	}
+
+	//移除一个观察者
+	@Override
+	public void removeObserver(Observer o) {
+		// TODO Auto-generated method stub
+		if(observers.contains(o)) {
+			observers.remove(o);
+		}
+	}
+
+	//遍历所有的观察者，并通知
+	@Override
+	public void notifyObservers() {
+		// TODO Auto-generated method stub
+		for(int i = 0; i < observers.size(); i++) {
+			observers.get(i).update(this.temperatrue, this.pressure, this.humidity);
+		}
+	}
+}
+
+---------------------------
+//观察者接口，有观察者来实现
+public interface Observer {
+
+	public void update(float temperature, float pressure, float humidity);
+}
+
+---------------------------
+public class BaiduSite implements Observer {
+
+	// 温度，气压，湿度
+	private float temperature;
+	private float pressure;
+	private float humidity;
+
+	// 更新 天气情况，是由 WeatherData 来调用，我使用推送模式
+	public void update(float temperature, float pressure, float humidity) {
+		this.temperature = temperature;
+		this.pressure = pressure;
+		this.humidity = humidity;
+		display();
+	}
+
+	// 显示
+	public void display() {
+		System.out.println("===百度网站====");
+		System.out.println("***百度网站 气温 : " + temperature + "***");
+		System.out.println("***百度网站 气压: " + pressure + "***");
+		System.out.println("***百度网站 湿度: " + humidity + "***");
+	}
+
+}
+
