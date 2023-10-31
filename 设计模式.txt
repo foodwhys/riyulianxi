@@ -1779,3 +1779,456 @@ public class ProxyFactory implements MethodInterceptor {
 
 }
 
+模板方法
+---------------------------
+ 在一个抽象类公开定义了执行它的方法的模板。
+ 它的子类可以按需要重写方法实现，但调用将以抽象类中定义的方式进行。
+
+简单说，模板方法模式定义一个操作中的算法的骨架，
+将一些步骤延迟到子类中，使得子类可以不改变一个算法的结构，
+就可以重定义该算法的某些特定步骤
+
+
+---------------------------
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//制作红豆豆浆
+		
+		System.out.println("----制作红豆豆浆----");
+		SoyaMilk redBeanSoyaMilk = new RedBeanSoyaMilk();
+		redBeanSoyaMilk.make();
+		
+		System.out.println("----制作花生豆浆----");
+		SoyaMilk peanutSoyaMilk = new PeanutSoyaMilk();
+		peanutSoyaMilk.make();
+		
+		System.out.println("----制作纯豆浆----");
+		SoyaMilk pureSoyaMilk = new PureSoyaMilk();
+		pureSoyaMilk.make();
+	}
+
+}
+
+---------------------------
+//抽象类，表示豆浆
+public abstract class SoyaMilk {
+
+	//模板方法, make , 模板方法可以做成final , 不让子类去覆盖.
+	final void make() {
+		
+		select(); 
+		if(customerWantCondiments()) {
+			addCondiments();
+		}
+		soak();
+		beat();
+		
+	}
+	
+	//选材料
+	void select() {
+		System.out.println("第一步：选择好的新鲜黄豆  ");
+	}
+	
+	//添加不同的配料， 抽象方法, 子类具体实现
+	abstract void addCondiments();
+	
+	//浸泡
+	void soak() {
+		System.out.println("第三步， 黄豆和配料开始浸泡， 需要3小时 ");
+	}
+	 
+	void beat() {
+		System.out.println("第四步：黄豆和配料放到豆浆机去打碎  ");
+	}
+	
+	//钩子方法，决定是否需要添加配料
+	boolean customerWantCondiments() {
+		return true;
+	}
+}
+
+不加
+---------------------------
+public class PureSoyaMilk extends SoyaMilk{
+
+	@Override
+	void addCondiments() {
+		// TODO Auto-generated method stub
+		//空实现
+	}
+	
+	@Override
+	boolean customerWantCondiments() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+ 
+}
+
+加东西
+---------------------------
+public class RedBeanSoyaMilk extends SoyaMilk {
+
+	@Override
+	void addCondiments() {
+		// TODO Auto-generated method stub
+		System.out.println(" 加入上好的红豆 ");
+	}
+
+}
+
+---------------------------
+在模板方法模式的父类中，我们可以定义一个方法它默认不做任何事，
+子类可以视情况要不要覆盖它，该方法称为“钩子”
+
+---------------------------
+命令模式
+---------------------------
+命名模式使得请求发送者与请求接收者消除彼此之间的耦合，
+让对象之间的调用关系更加灵活，实现解耦。
+
+1) Invoker 是调用者角色
+2) Command. 是命令角色，需要执行的所有命令都在这里，可以是接口或抽象类
+3) Receiver: 接受者角色，知道如何实施和执行一个请求相关的操作
+4) ConcreteCommand. 将一个接受者对象与一个动作绑定，调用接受者相应的操作，实现 execute
+
+
+---------------------------
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		//使用命令设计模式，完成通过遥控器，对电灯的操作
+		
+		//创建电灯的对象(接受者)
+		LightReceiver lightReceiver = new LightReceiver();
+		
+		//创建电灯相关的开关命令
+		LightOnCommand lightOnCommand = new LightOnCommand(lightReceiver);
+		LightOffCommand lightOffCommand = new LightOffCommand(lightReceiver);
+		
+		//需要一个遥控器
+		RemoteController remoteController = new RemoteController();
+		
+		//给我们的遥控器设置命令, 比如 no = 0 是电灯的开和关的操作
+		remoteController.setCommand(0, lightOnCommand, lightOffCommand);
+		
+		System.out.println("--------按下灯的开按钮-----------");
+		remoteController.onButtonWasPushed(0);
+		System.out.println("--------按下灯的关按钮-----------");
+		remoteController.offButtonWasPushed(0);
+		System.out.println("--------按下撤销按钮-----------");
+		remoteController.undoButtonWasPushed();
+		
+		
+		System.out.println("=========使用遥控器操作电视机==========");
+		
+		TVReceiver tvReceiver = new TVReceiver();
+		
+		TVOffCommand tvOffCommand = new TVOffCommand(tvReceiver);
+		TVOnCommand tvOnCommand = new TVOnCommand(tvReceiver);
+		
+		//给我们的遥控器设置命令, 比如 no = 1 是电视机的开和关的操作
+		remoteController.setCommand(1, tvOnCommand, tvOffCommand);
+		
+		System.out.println("--------按下电视机的开按钮-----------");
+		remoteController.onButtonWasPushed(1);
+		System.out.println("--------按下电视机的关按钮-----------");
+		remoteController.offButtonWasPushed(1);
+		System.out.println("--------按下撤销按钮-----------");
+		remoteController.undoButtonWasPushed();
+
+	}
+
+}
+
+
+---------------------------
+//创建命令接口
+public interface Command {
+
+	//执行动作(操作)
+	public void execute();
+	//撤销动作(操作)
+	public void undo();
+}
+
+
+---------------------------
+public class LightOffCommand implements Command {
+
+	// 聚合LightReceiver
+
+	LightReceiver light;
+
+	// 构造器
+	public LightOffCommand(LightReceiver light) {
+			super();
+			this.light = light;
+		}
+
+	@Override
+	public void execute() {
+		// TODO Auto-generated method stub
+		// 调用接收者的方法
+		light.off();
+	}
+
+	@Override
+	public void undo() {
+		// TODO Auto-generated method stub
+		// 调用接收者的方法
+		light.on();
+	}
+}
+
+---------------------------
+public class LightOnCommand implements Command {
+
+	//聚合LightReceiver
+	
+	LightReceiver light;
+	
+	//构造器
+	public LightOnCommand(LightReceiver light) {
+		super();
+		this.light = light;
+	}
+	
+	@Override
+	public void execute() {
+		// TODO Auto-generated method stub
+		//调用接收者的方法
+		light.on();
+	}
+
+	
+
+	@Override
+	public void undo() {
+		// TODO Auto-generated method stub
+		//调用接收者的方法
+		light.off();
+	}
+
+}
+
+---------------------------
+public class LightReceiver {
+
+	public void on() {
+		System.out.println(" 电灯打开了.. ");
+	}
+	
+	public void off() {
+		System.out.println(" 电灯关闭了.. ");
+	}
+}
+
+---------------------------
+/**
+ * 没有任何命令，即空执行: 用于初始化每个按钮, 当调用空命令时，对象什么都不做
+ * 其实，这样是一种设计模式, 可以省掉对空判断
+ * @author Administrator
+ *
+ */
+public class NoCommand implements Command {
+
+	@Override
+	public void execute() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void undo() {
+		// TODO Auto-generated method stub
+		
+	}
+
+}
+
+---------------------------
+public class RemoteController {
+
+	// 开 按钮的命令数组
+	Command[] onCommands;
+	Command[] offCommands;
+
+	// 执行撤销的命令
+	Command undoCommand;
+
+	// 构造器，完成对按钮初始化
+
+	public RemoteController() {
+
+		onCommands = new Command[5];
+		offCommands = new Command[5];
+
+		for (int i = 0; i < 5; i++) {
+			onCommands[i] = new NoCommand();
+			offCommands[i] = new NoCommand();
+		}
+	}
+
+	// 给我们的按钮设置你需要的命令
+	public void setCommand(int no, Command onCommand, Command offCommand) {
+		onCommands[no] = onCommand;
+		offCommands[no] = offCommand;
+	}
+
+	// 按下开按钮
+	public void onButtonWasPushed(int no) { // no 0
+		// 找到你按下的开的按钮， 并调用对应方法
+		onCommands[no].execute();
+		// 记录这次的操作，用于撤销
+		undoCommand = onCommands[no];
+
+	}
+
+	// 按下开按钮
+	public void offButtonWasPushed(int no) { // no 0
+		// 找到你按下的关的按钮， 并调用对应方法
+		offCommands[no].execute();
+		// 记录这次的操作，用于撤销
+		undoCommand = offCommands[no];
+
+	}
+	
+	// 按下撤销按钮
+	public void undoButtonWasPushed() {
+		undoCommand.undo();
+	}
+
+}
+
+---------------------------
+访问者模式
+---------------------------
+封装一些作用于某种数据结构的各元素的操作，
+它可以在不改变数据结构的前提下定义作用于这些元素的新的操作。
+
+主要将数据结构与数据操作分离，解决数据结构和操作耦合性问题
+
+
+1) Visitor 是抽象访问者，为该对象结构中的 ConcreteElement 的每一个类声明一个 visit 操作
+2) ConcreteVisitor：是一个具体的访问值实现每个有 Visltor 声明的操作，是每个操作实现的部分，
+3) ObjectStructure能枚举它的元素，可以提供一个高层的接口，用来允许访问者访问元素
+4) Element 定义一个 accept 方法，接收一个访问者对象
+5) ConcreteElement 为具体元素，实现了 accept 方法
+
+public class Client {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		//创建ObjectStructure
+		ObjectStructure objectStructure = new ObjectStructure();
+		
+		objectStructure.attach(new Man());
+		objectStructure.attach(new Woman());
+		
+		
+		//成功
+		Success success = new Success();
+		objectStructure.display(success);
+		
+		System.out.println("===============");
+		Fail fail = new Fail();
+		objectStructure.display(fail);
+		
+		System.out.println("=======给的是待定的测评========");
+		
+		Wait wait = new Wait();
+		objectStructure.display(wait);
+	}
+
+}
+
+---------------------------
+//数据结构，管理很多人（Man , Woman）
+public class ObjectStructure {
+
+	//维护了一个集合
+	private List<Person> persons = new LinkedList<>();
+	
+	//增加到list
+	public void attach(Person p) {
+		persons.add(p);
+	}
+	//移除
+	public void detach(Person p) {
+		persons.remove(p);
+	}
+	
+	//显示测评情况
+	public void display(Action action) {
+		for(Person p: persons) {
+			p.accept(action);
+		}
+	}
+}
+
+
+---------------------------
+public abstract class Person {
+	
+	//提供一个方法，让访问者可以访问
+	public abstract void accept(Action action);
+}
+
+---------------------------
+public class Man extends Person {
+
+	@Override
+	public void accept(Action action) {
+		// TODO Auto-generated method stub
+		action.getManResult(this);
+	}
+
+}
+
+---------------------------
+//说明
+//1. 这里我们使用到了双分派, 即首先在客户端程序中，将具体状态作为参数传递Woman中(第一次分派)
+//2. 然后Woman 类调用作为参数的 "具体方法" 中方法getWomanResult, 同时将自己(this)作为参数
+//   传入，完成第二次的分派
+public class Woman extends Person{
+
+	@Override
+	public void accept(Action action) {
+		// TODO Auto-generated method stub
+		action.getWomanResult(this);
+	}
+
+}
+
+---------------------------
+public abstract class Action {
+	
+	//得到男性 的测评
+	public abstract void getManResult(Man man);
+	
+	//得到女的 测评
+	public abstract void getWomanResult(Woman woman);
+}
+
+public class Fail extends Action {
+
+	@Override
+	public void getManResult(Man man) {
+		// TODO Auto-generated method stub
+		System.out.println(" 男人给的评价该歌手失败 !");
+	}
+
+	@Override
+	public void getWomanResult(Woman woman) {
+		// TODO Auto-generated method stub
+		System.out.println(" 女人给的评价该歌手失败 !");
+	}
+
+}
+
