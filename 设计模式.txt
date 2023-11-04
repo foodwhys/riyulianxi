@@ -2778,7 +2778,6 @@ public class Memento {
 }
 
 ---------------------------
-
 public class Caretaker {
 	
 	//在List 集合中会有很多的备忘录对象
@@ -2793,3 +2792,273 @@ public class Caretaker {
 		return mementoList.get(index);
 	}
 }
+
+解释器模式
+---------------------------
+输入表达式 a+b-c等
+输入a的值 1
+输入b的值 1
+输入c的值 1
+运算结果：
+
+是指给定一个语言（表达式），
+定义它的文法的一种表示并定义一个解释器使用该解释器来解释语言中的句子（表达式）
+
+1) Context: 是环境角色，含有解释器之外的全局信息
+2) AbstractExpression: 抽象表达式，声明一个抽象的解释操作，这个方法为抽象语法树中所有的节点所共享
+3) TermrnalExpression: 为终结符表达式，实现与文法中的终结符相关的解释操作
+4) NonTermialExpression: 为非终结符表达式，为文法中的非终结符实现解释操作
+5) 说明：输入 Context he TerminalExpression 信息通过 Client 输入即可
+
+public class ClientTest {
+
+	public static void main(String[] args) throws IOException {
+		String expStr = getExpStr(); // a+b
+		HashMap<String, Integer> var = getValue(expStr);// var {a=10, b=20}
+		Calculator calculator = new Calculator(expStr);
+		System.out.println("运算结果：" + expStr + "=" + calculator.run(var));
+	}
+
+	// 获得表达式
+	public static String getExpStr() throws IOException {
+		System.out.print("请输入表达式：");
+		return (new BufferedReader(new InputStreamReader(System.in))).readLine();
+	}
+
+	// 获得值映射
+	public static HashMap<String, Integer> getValue(String expStr) throws IOException {
+		HashMap<String, Integer> map = new HashMap<>();
+
+		for (char ch : expStr.toCharArray()) {
+			if (ch != '+' && ch != '-') {
+				if (!map.containsKey(String.valueOf(ch))) {
+					System.out.print("请输入" + String.valueOf(ch) + "的值：");
+					String in = (new BufferedReader(new InputStreamReader(System.in))).readLine();
+					map.put(String.valueOf(ch), Integer.valueOf(in));
+				}
+			}
+		}
+
+		return map;
+	}
+}
+
+
+---------------------------
+public class Calculator {
+
+	// 定义表达式
+	private Expression expression;
+
+	// 构造函数传参，并解析
+	public Calculator(String expStr) { // expStr = a+b
+		// 安排运算先后顺序
+		Stack<Expression> stack = new Stack<>();
+		// 表达式拆分成字符数组 
+		char[] charArray = expStr.toCharArray();// [a, +, b]
+
+		Expression left = null;
+		Expression right = null;
+		//遍历我们的字符数组， 即遍历  [a, +, b]
+		//针对不同的情况，做处理
+		for (int i = 0; i < charArray.length; i++) {
+			switch (charArray[i]) {
+			case '+': //
+				left = stack.pop();// 从stack取出left => "a"
+				right = new VarExpression(String.valueOf(charArray[++i]));// 取出右表达式 "b"
+				stack.push(new AddExpression(left, right));// 然后根据得到left 和 right 构建 AddExpresson加入stack
+				break;
+			case '-': // 
+				left = stack.pop();
+				right = new VarExpression(String.valueOf(charArray[++i]));
+				stack.push(new SubExpression(left, right));
+				break;
+			default: 
+				//如果是一个 Var 就创建要给 VarExpression 对象，并push到 stack
+				stack.push(new VarExpression(String.valueOf(charArray[i])));
+				break;
+			}
+		}
+		//当遍历完整个 charArray 数组后，stack 就得到最后Expression
+		this.expression = stack.pop();
+	}
+
+	public int run(HashMap<String, Integer> var) {
+		//最后将表达式a+b和 var = {a=10,b=20}
+		//然后传递给expression的interpreter进行解释执行
+		return this.expression.interpreter(var);
+	}
+}
+
+
+---------------------------
+状态模式
+---------------------------
+状态模式 (State Pattern) ：它主要用来解决对象在多种状态转换时，
+需要对外输出不同的行为的问题。状态和行为是一一对应的，状态之间可以相互转换
+
+对原理类图的说明．即（状态模式的角色及职责）
+1) Context 类为环境角色，用于维护 State 实例，这个实例定义当前状态
+2) State 是抽象状态角色，定义一个接口封装与 Context 的一个特点接口相关行为
+3) ConcreteState 具体的状态角色，每个子类实现一个与 Context 的一个状态相关行为
+
+
+---------------------------
+/**
+ * 状态模式测试类
+ * @author Administrator
+ *
+ */
+public class ClientTest {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		// 创建活动对象，奖品有1个奖品
+        RaffleActivity activity = new RaffleActivity(1);
+
+        // 我们连续抽300次奖
+        for (int i = 0; i < 30; i++) {
+            System.out.println("--------第" + (i + 1) + "次抽奖----------");
+            // 参加抽奖，第一步点击扣除积分
+            activity.debuctMoney();
+
+            // 第二步抽奖
+            activity.raffle();
+        }
+	}
+
+}
+
+
+---------------------------
+/**
+ * 状态抽象类
+ * @author Administrator
+ *
+ */
+public abstract class State {
+
+	
+	// 扣除积分 - 50
+    public abstract void deductMoney();
+
+    // 是否抽中奖品
+    public abstract boolean raffle();
+
+    // 发放奖品
+    public abstract  void dispensePrize();
+
+}
+
+
+---------------------------
+/**
+ * 抽奖活动 //
+ * 
+ * @author Administrator
+ *
+ */
+public class RaffleActivity {
+
+	// state 表示活动当前的状态，是变化
+    State state = null;
+    // 奖品数量
+    int count = 0;
+    
+    // 四个属性，表示四种状态
+    State noRafflleState = new NoRaffleState(this);
+    State canRaffleState = new CanRaffleState(this);
+    
+    State dispenseState =   new DispenseState(this);
+    State dispensOutState = new DispenseOutState(this);
+
+    //构造器
+    //1. 初始化当前的状态为 noRafflleState（即不能抽奖的状态）
+    //2. 初始化奖品的数量 
+    public RaffleActivity( int count) {
+        this.state = getNoRafflleState();
+        this.count = count;
+    }
+
+    //扣分, 调用当前状态的 deductMoney
+    public void debuctMoney(){
+        state.deductMoney();
+    }
+
+    //抽奖 
+    public void raffle(){
+    	// 如果当前的状态是抽奖成功
+        if(state.raffle()){
+        	//领取奖品
+            state.dispensePrize();
+        }
+
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    //这里请大家注意，每领取一次奖品，count--
+    public int getCount() {
+    	int curCount = count; 
+    	count--;
+        return curCount;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public State getNoRafflleState() {
+        return noRafflleState;
+    }
+
+    public void setNoRafflleState(State noRafflleState) {
+        this.noRafflleState = noRafflleState;
+    }
+
+    public State getCanRaffleState() {
+        return canRaffleState;
+    }
+
+    public void setCanRaffleState(State canRaffleState) {
+        this.canRaffleState = canRaffleState;
+    }
+
+    public State getDispenseState() {
+        return dispenseState;
+    }
+
+    public void setDispenseState(State dispenseState) {
+        this.dispenseState = dispenseState;
+    }
+
+    public State getDispensOutState() {
+        return dispensOutState;
+    }
+
+    public void setDispensOutState(State dispensOutState) {
+        this.dispensOutState = dispensOutState;
+    }
+}
+
+---------------------------
+策略模式
+---------------------------
+
+策略模式（ Strategy Pattern) 中，定义算法族（策略组），分别封装起来，
+让他们之间可以互相替换，此模式让算法的变化独于使用算法的客户
+
+---------------------------
+职责链模式（责任链模式）。
+---------------------------
+1) Handler 抽象的处理者，定义了一个处理请求的接口，同时含义另外 Handler
+2) ConcreteHandlerA ， B 是具体的处理者，处理它自己负责的请求，可以访问它的后继者（即下一个处理者），如果
+   可以处理当前请求，则处理，否则就将该请求交个后继者去处理，从而形成一个职责链
+3) Request ，含义很多属性，表示一个请求
+
