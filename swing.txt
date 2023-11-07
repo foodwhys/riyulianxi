@@ -241,3 +241,29 @@ Swing 组件具有如下 4 个额外的功能 :
 给组件设置边框步骤：
 1. 使用BorderFactory或者XxxBorder创建Border的实例对象；
 2. 调用Swing组件的setBorder（Border b）方法为组件设置边框；
+
+Swing组件按照功能来分类：
+
+1. 顶层容器: JFrame、JApplet、JDialog 和 JWindow 。
+2. 中间容器: JPanel 、 JScrollPane 、 JSplitPane 、 JToolBar 等 。
+3. 特殊容器:在用户界面上具有特殊作用的中间容器，如 JIntemalFrame 、 JRootPane 、 JLayeredPane和 JDestopPane 等 。
+4. 基本组件 : 实现人机交互的组件，如 JButton、 JComboBox 、 JList、 JMenu、 JSlider 等 。
+5. 不可编辑信息的显示组件:向用户显示不可编辑信息的组件，如JLabel 、 JProgressBar 和 JToolTip等。
+6. 可编辑信息的显示组件:向用户显示能被编辑的格式化信息的组件，如 JTable 、 JTextArea 和JTextField 等 。
+7. 特殊对话框组件:可以直接产生特殊对话框的组件 ， 如 JColorChooser 和 JFileChooser 等。
+
+JToolBar  API:
+
+| 方法名称                                 | 方法功能                                                     |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| JToolBar( String name , int orientation) | 创建一个名字为name，方向为orientation的工具条对象，其orientation的是取值可以是SwingConstants.HORIZONTAL或SwingConstants.VERTICAL |
+| JButton add(Action a)                    | 通过Action对象为JToolBar工具条添加对应的工具按钮             |
+| addSeparator( Dimension size )           | 向工具条中添加指定大小的分隔符                               |
+| setFloatable( boolean b )                | 设定工具条是否可以被拖动                                     |
+| setMargin(Insets m)                      | 设置工具条与工具按钮的边距                                   |
+| setOrientation( int o )                  | 设置工具条的方向                                             |
+| setRollover(boolean rollover)            | 设置此工具条的rollover状态                                   |
+
+Swing提供了JColorChooser和JFileChooser
+这两种对话框，可以很方便的完成颜色的选择和本地文件的选择。
+
