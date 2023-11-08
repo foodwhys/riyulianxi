@@ -34,7 +34,11 @@ getComponents 返回该容器内的所有组件
 常用API
 ------------------------------------
 setLayout 设置式样
+// 设置窗口位置和大小
+jf.setBounds(400,400,400,400);
 
+// 固定窗口大小
+jf.setResizable(false);
 
 ------------------------------------
 LayoutManager布局管理器
@@ -267,3 +271,135 @@ JToolBar  API:
 Swing提供了JColorChooser和JFileChooser
 这两种对话框，可以很方便的完成颜色的选择和本地文件的选择。
 
+JOptionPane 可以非常方便地创建一些简单的对话框， 
+Swing 已经为这些对话框添加了相应的组件，无须程序员手动添加组件 。
+
+ JOptionPane 提供了如下 4 个方法来创建对话框 。
+| 方法名称                                    | 方法功能                                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| showMessageDialog/showInternalMessageDialog | 消息对话框 ，告知用户某事己发生 ， 用户只能单击"确定"按钮 ， 类似于 JavaScript 的 alert 函数 。                               |
+| showConfirmDialog/showInternalConfirmDialog | 确认对话框，向用户确认某个问题，用户可以选择 yes 、 no ~ cancel 等选项 。 类似于 JavaScript 的 comfirm 函数 。该方法返回用户单击了 哪个按钮 |
+| showInputDialog/showInternalInputDialog     | 输入对话框，提示要求输入某些信息，类似于 JavaScript的 prompt 函数。该方法返回用户输入的字符串 。                                  |
+| showOptionDialog/showInternalOptionDialog   | 自定义选项对话框 ，允许使用自 定义选项 ，可以取代showConfirmDialog 所产生的对话框，只是用起来更复杂 。                              |
+
+showXxxDialog(Component parentComponent,
+        Object message, 
+        String title, 
+        int optionType, 
+        int messageType,
+            Icon icon,
+        Object[] options, 
+        Object initialValue)
+--参数解释：
+parentComponent：当前对话框的父组件
+message：对话框上显示的信息，信息可以是字符串、组件、图片等
+title：当前对话框的标题
+optionType：当前对话框上显示的按钮类型：DEFAULT_OPTION、YES_NO_OPTION、YES_NO_CANCEL_OPTION、OK_CANCEL_OPTION
+messageType:当前对话框的类型:ERROR_MESSAGE、INFORMATION_MESSAGE、WARNING_MESSAGE、QUESTION_MESSAGE、PLAIN_MESSAGE
+icon:当前对话框左上角的图标
+options:自定义下拉列表的选项
+initialValue:自定义选项中的默认选中项
+
+**当用户与对话框交互结束后，不同类型对话框的返回值如下：**
+
+- showMessageDialog: 无返回值 。
+- showlnputDialog: 返回用户输入或选择的字符串 。
+- showConfirmDialog: 返回 一个整数代表用户选择的选项 。
+- showOptionDialog : 返回 一个整数代表用户选择的选项，如果用户选择第一项，则返回 0; 如果选择第二项，则返回1……依此类推 。
+
+**对 showConfirmDialog 所产生的对话框，有如下几个返回值：**
+
+- YES OPTION: 用户 单击了 "是"按钮后返回 。
+- NO OPTION: 用 户单击了"否"按钮后返回 。
+- CANCEL OPTION: 用户单击了"取消"按钮后返回 。
+- OK OPTION : 用户单击了"确定"按钮后返回 。
+- CLOSED OPTION: 用户 单击了对话框右上角的 " x" 按钮后返回。
+
+------------------------------------
+JSplitPane
+------------------------------------
+JSplitPane 用于创建一个分割面板,它可以将 一个组件(通常是一个容器)分割成两个部分，
+并提供一个分割条 ， 用户可以拖动该分割条来调整两个部分的大小。
+
+通过如下构造方法可以创建JSplitPane对象
+JSplitPane(int newOrientation, Component newLeftComponent,Component newRightComponent)
+
+    newOrientation：指定JSplitPane容器的分割方向：
+		如果值为JSplitPane.VERTICAL_SPLIT,为纵向分割；
+		如果值为JSplitPane.HORIZONTAL_SPLIT，为横向分割；
+    newLeftComponent：左侧或者上侧的组件；
+    newRightComponent：右侧或者下侧的组件；
+
+
+2. 设置是否开启连续布局的支持(可选)
+------------------------------------
+setContinuousLayout(boolean newContinuousLayout):
+    默认是关闭的，如果设置为true，则打开连续布局的支持，但由于连续布局支持需要不断的重绘组件，所以效率会低一些
+
+
+3. 设置是否支持"一触即展"的支持(可选)
+------------------------------------
+setOneTouchExpandable(boolean newValue):
+    默认是关闭的，如果设置为true，则打开"一触即展"的支持
+
+
+4. 其他设置
+------------------------------------
+setDividerLocation(double proportionalLocation):设置分隔条的位置为JSplitPane的某个百分比
+setDividerLocation(int location)：通过像素值设置分隔条的位置
+setDividerSize(int newSize)：通过像素值设置分隔条的大小
+setLeftComponent(Component comp)/setTopComponent(Component comp)/setRightComponent(Component comp)/setBottomComponent(Component comp):
+设置指定位置的组件
+
+setPreferredSize(new Dimension(150,400));
+------------------------------------
+setPreferredSize()是Java Swing中的一个方法,用于设置组件的首选大小
+Dimension 封装了一个构件的高度和宽度。
+
+JTabledPane
+------------------------------------
+JTabbedPane可以很方便地在窗口上放置多个标签页，每个标签页相当于获得了一个与外部容器具有相同大小的组件摆放区域
+
+1. 创建JTabbedPane对象
+------------------------------------
+ JTabbedPane(int tabPlacement, int tabLayoutPolicy):
+    tabPlacement:
+        指定标签标题的放置位置，可以选择 SwingConstants中的四个常量：TOP、LEFT、BOTTOM、RIGHT
+    tabLaoutPolicy:
+        指定当窗口不能容纳标签页标题时的布局策略，可以选择JTabbedPane.WRAP_TAB_LAYOUT和JTabbedPane.SCROLL_TAB_LAYOUT
+
+
+2. 通过JTabbedPane对象堆标签进行增删改查
+------------------------------------
+addTab(String title, Icon icon, Component component, String tip):添加标签
+    title:标签的名称
+    icon:标签的图标
+    component:标签对应的组件
+    tip:光标放到标签上的提示
+
+insertTab(String title, Icon icon, Component component, String tip, int index):插入标签页
+    title:标签的名称
+    icon:标签的图标
+    component:标签对应的组件
+    tip:光标放到标签上的提示
+    index:在哪个索引处插入标签页
+setComponentAt(int index, Component component):修改标签页对应的组件
+    index:修改哪个索引处的标签
+    component:标签对应的组件
+removeTabAt(int index):
+    index:删除哪个索引处的标签
+
+3. 设置当前显示的标签页
+------------------------------------
+setSelectedIndex(int index):设置哪个索引处的标签被选中
+
+4. 设置JTabbedPane的其他属性
+------------------------------------
+setDisabledIconAt(int index, Icon disabledIcon): 将指定位置的禁用图标设置为 icon，该图标也可以是null表示不使用禁用图标。
+setEnabledAt(int index, boolean enabled): 设置指定位置的标签页是否启用。
+setTitleAt(int index, String title): 设置指定位置标签页的标题为 title，该title可以是null,这表明设置该标签页的标题为空。
+setToolTipTextAt(int index, String toolTipText): 设置指定位置标签页的提示文本 。
+
+5. 为JTabbedPane设置监听器
+------------------------------------
+addChangeListener(ChangeListener l)
