@@ -403,3 +403,148 @@ setToolTipTextAt(int index, String toolTipText): 设置指定位置标签页的�
 5. 为JTabbedPane设置监听器
 ------------------------------------
 addChangeListener(ChangeListener l)
+
+
+JLayeredPane
+------------------------------------
+LayeredPane是 一个代表有层 次深度的容器 ， 它允许组件在需要 时 互相重叠。
+了如下几个默认层：
+
+1. DEFAULT_LAYER:大多数组件位于标准层，这是最底层；
+2. PALETTE_LAYER : 调色板层位于默认层之上 。该层对于浮动工具栏和调色板很有用，因此可以位于其他组件之上 。
+3. MODAL_LAYER: 该层用于显示模式对话框。它们将出现在容器中所有工具栏 、调色板或标准组件的上面 。
+4. POPUP_LAYER : 该层用于显示右键菜单 ， 与对话框 、工具提示和普通组件关联的弹出式窗口将出现在对应的对话框、工具提示和普通组件之上。
+5. DRAG_LAYER: 该层用于放置拖放过程中的组件(关于拖放操作请看下一节内 容) ，拖放操作中的组件位于所有组件之上 。 一旦拖放操作结束后 ， 该组件将重新分配到其所属的正常层。
+
+JLayeredPane 方法：
+
+1. moveToBack(Component c)：把当前组件c移动到所在层的所有组件的最后一个位置；
+2. moveToFront(Component c)：把当前组件c移动到所在层的所有组件的第一个位置；
+3. setLayer(Component c, int layer)：更改组件c所处的层；
+
+需要注意的是，往JLayeredPane中添加组件，如果要显示，则必须手动设置该组件在容器中显示的位置以及大小。
+
+------------------------------------
+JProcessBar、ProcessMonitor、BoundedRangeModel实现进度条
+------------------------------------
+
+1. 创建JProgressBar对象
+------------------------------------
+public JProgressBar(int orient, int min, int max):
+    orint:方向
+    min:最小值
+    max:最大值
+
+2. 设置属性
+------------------------------------
+setBorderPainted(boolean b):设置进度条是否有边框
+setIndeterminate(boolean newValue):设置当前进度条是不是进度不确定的进度条，如果是，则将看到一个滑块在进度条中左右移动
+setStringPainted(boolean b)：设置进度条是否显示当前完成的百分比
+
+3. 获取和设置当前进度条的进度状态
+------------------------------------
+setValue(int n):设置当前进度值
+double getPercentComplete():获取进度条的完成百分比
+String  getStrin():返回进度字符串的当前值
+
+
+Swing 组件大都将外观显示和 内部数据分离(MVC模式)
+------------------------------------
+JProgressBar 组件有一个内置的用于保存其状态数据的Model对象
+
+ProgressMonitor创建进度对话框
+------------------------------------
+public ProgressMonitor(Component parentComponent,Object message,String note, int min,int max):
+    parentComponent:对话框的父组件
+    message:对话框的描述信息
+    note:对话框的提示信息
+    min:进度条的最小值
+    max:进度条的最大值
+
+JList、JComboBox实现列表框
+------------------------------------
+JList 和 JComboBox 都是极其相似的，它们都有一个列表框，只是 JComboBox的列表框需要 以下拉方式显示出来
+
+1. 创建JList或JComboBox对象
+------------------------------------
+JList(final E[] listData):创建JList对象，把listData数组中的每项内容转换成一个列表项展示
+JList(final Vector<? extends E> listData):创建JList对象，把listData数组中的每项内容转换成一个列表项展示
+JComboBox(E[] items):
+JComboBox(Vector<E> items):
+
+2. 设置JList或JComboBox的外观行为
+---------------------------JList----------------------------------------------
+addSelectionInterval(int anchor, int lead):在已经选中列表项的基础上，增加选中从anchor到lead索引范围内的所有列表项
+setFixedCellHeight(int height)/setFixedCellWidth(int width):设置列表项的高度和宽度
+setLayoutOrientation(int layoutOrientation)：设置列表框的布局方向
+setSelectedIndex(int index)：设置默认选中项
+setSelectedIndices(int[] indices)：设置默认选中的多个列表项
+setSelectedValue(Object anObject,boolean shouldScroll)：设置默认选中项，并滚动到该项显示
+setSelectionBackground(Color selectionBackground)：设置选中项的背景颜色
+setSelectionForeground(Color selectionForeground)：设置选中项的前景色
+setSelectionInterval(int anchor, int lead):设置从anchor到lead范围内的所有列表项被选中
+setSelectionMode(int selectionMode)：设置选中模式，默认没有限制，也可以设置为单选或者区域选中
+setVisibleRowCount(int visibleRowCount)：设置列表框的可是高度足以显示多少行列表项
+---------------------------JComboBox---------------------------------------------- 
+setEditable(boolean aFlag)：设置是否可以直接修改列表文本框的值，默认为不可以
+setMaximumRowCount(int count)：设置列表框的可是高度足以显示多少行列表项
+setSelectedIndex(int anIndex)：设置默认选中项
+setSelectedItem(Object anObject)：根据列表项的值，设置默认选中项
+
+
+不强制存储列表项的ListModel和ComboBoxModel
+------------------------------------
+与JProgressBar一样，JList和JComboBox也采用了MVC的设计模式，J
+List和JComboBox只负责外观的显示，而组件底层的状态数据则由对应的Model来维护
+public interface ListModel<E>{
+
+  int getSize();
+
+  E getElementAt(int index);
+
+  void addListDataListener(ListDataListener l);
+
+  void removeListDataListener(ListDataListener l);
+}
+
+public interface ComboBoxModel<E> extends ListModel<E> {
+
+  void setSelectedItem(Object anItem);
+
+  Object getSelectedItem();
+}
+
+强制存储列表项的DefaultListModel和DefaultComboBoxModel
+------------------------------------
+当使用JList 或 JComboBox 时 常常还需要动态地增加、删除列表项,例如JCombox提供了下列方法完成增删操作
+addItem(E item):添加一个列表项
+insertItemAt(E item, int index)：向指定索引处插入一个列表项
+removeAllItems()：删除所有列表项
+removeItem(Object anObject)：删除指定列表项
+removeItemAt(int anIndex)：删除指定索引处的列表项
+
+DefaultListModel 提供了如下几个方法来添加、删除元素
+------------------------------------
+add(int index, E element): 在该 ListModel 的指定位置处插入指定元素 。
+addElement(E obj): 将指定元素添加到该 ListModel 的末尾 。
+insertElementAt(E obj, int index): 在该 ListModel 的指定位置处插入指定元素 。
+Object remove(int index): 删除该 ListModel 中指定位置处的元素 
+removeAllElements(): 删 除该 ListModel 中的所有元素，并将其的大小设置为零 。
+removeElement(E obj): 删除该 ListModel 中第一个与参数匹配的元素。
+removeElementAt(int index): 删除该 ListModel 中指定索引处的元素 。
+removeRange(int 企omIndex ， int toIndex): 删除该 ListModel 中指定范围内的所有元素。
+set(int index, E element) : 将该 ListModel 指定索引处的元素替换成指定元素。
+setElementAt(E obj, int index): 将该 ListModel 指定索引处的元素替换成指定元素。
+
+
+使用ListCellRenderer改变列表外观
+------------------------------------
+public interface ListCellRenderer<E>
+{
+    Component getListCellRendererComponent(
+        JList<? extends E> list,//列表组件
+        E value,//当前列表项的值额索引
+        int index,//当前列表项d
+        boolean isSelected,//当前列表项是否被选中
+        boolean cellHasFocus);//当前列表项是否获取了焦点
+}
