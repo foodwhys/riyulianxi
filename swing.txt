@@ -548,3 +548,131 @@ public interface ListCellRenderer<E>
         boolean isSelected,//当前列表项是否被选中
         boolean cellHasFocus);//当前列表项是否获取了焦点
 }
+
+
+JTree、TreeModel实现树
+------------------------------------
+树也是图形用户界面中使用非常广泛的 GUI 组件，例如使用 Windows 资源管理器时，将看到如下图所示的目录树
+
+当一个结点具有子结点时，该结点有两种状态：
+
+​ 展开状态:当父结点处于展开状态时，其子结点是可见的；
+
+​ 折叠状态: 当父结点处于折叠状态时，其子结点都是不可见的 。
+
+JTree(TreeModel newModel):使用指定 的数据模型创建 JTree 对象，它默认显示根结点。
+JTree(TreeNode root): 使用 root 作为根节 点创建 JTree 对象，它默认显示根结点 。
+JTree(TreeNode root, boolean asksAllowsChildren): 使用root作为根结点创建JTree对象，
+它默认显示根结点。 asksAllowsChildren 参数控制怎样的结点才算叶子结点，如果该参数为 true ，
+则只有当程序使用 setAllowsChildren(false)显式设置某个结点不允许添加子结点时(以后也不会拥有子结点) ，
+该结点才会被 JTree 当成叶子结点:如果该参数为 false ，则只要某个结点当时没有子结点(不管以后是否拥有子结点) 
+，该结点都会被 JTree 当成叶子结点。
+
+
+JTree的其他外观设置方法
+------------------------------------
+tree.putClientProperty( "JTree.lineStyle", "None"):设置结点之间没有连接线
+tree.putClientProperty("JTree.lineStyle" , "Horizontal")：设置结点之间只有水平分割线
+tree.setShowsRootHandles(true)：设置根结点有"展开、折叠"图标
+tree.setRootVisible(false)：隐藏根结点
+
+DefaultMutableTreeNode其他成员方法：
+------------------------------------
+Enumeration breadthFirstEnumerationO/preorderEnumeration(): 按广度优先的顺序遍历以此结点为根的子树，并返回所有结点组成的枚举对象 。
+Enumeration depthFirstEnumerationO/postorderEnumeration(): 按深度优先的顺序遍历以此结点为根的子树，并返回所有结点组成的枚举对象 。
+DefaultMutableTreeNode getNextSibling(): 返回此结点的下一个兄弟结点 。
+TreeNode getParent(): 返回此结点的父结点 。 如果此结点没有父结点，则返回null 。
+TreeNode[] getPath(): 返回从根结点到达此结点的所有结点组成的数组。
+DefaultMutableTreeNode getPreviousSibling(): 返回此结点的上一个兄弟结点。
+TreeNode getRoot(): 返回包含此结点的树的根结点 。
+TreeNode getSharedAncestor(DefaultMutableTreeNode aNode): 返回此结点和aNode最近的共同祖先 。
+int getSiblingCount(): 返回此结点的兄弟结点数 。
+boolean isLeaf(): 返回该结点是否是叶子结点 。
+boolean isNodeAncestor(TreeNode anotherNode): 判断anotherNode是否是当前结点的祖先结点(包括父结点) 。
+boolean isNodeChild(TreeNode aNode): 如果aNode是此结点的子结点，则返回true。
+boolean isNodeDescendant(DefaultMutableTreeNode anotherNode): 如果 anotherNode 是此结点的后代，包括是此结点本身、此结点的子结点或此结点的子结点的后代，都将返回true 。
+boolean isNodeRelated(DefaultMutableTreeNode aNode) : 当aNode和当前结点位于同一棵树中时返回 true 。
+boolean isNodeSibling(TreeNode anotherNode): 返回anotherNode是否是当前结点的兄弟结点 。
+boolean isRoot(): 返回当前结点是否是根结点 。
+Enumeration pathFromAncestorEnumeration(TreeNode ancestor): 返回从指定祖先结点到当前结点的所有结点组成的枚举对象 。
+
+2 拖动、编辑树结点
+------------------------------------
+JTree 的setEditable(boolean b)方法，传入 true 即可把这棵树变成可编辑的树
+(可以添加、删除结点，也可以改变结点数据)
+
+获取当前被选中的结点，会有两种方式：
+一：
+	通过JTree对象的某些方法，例如 TreePath getSelectionPath()等，得到一个TreePath对象，
+	包含了从根结点到当前结点路径上的所有结点；
+	调用TreePath对象的 Object getLastPathComponent()方法，得到当前选中结点
+二：
+	调用JTree对象的 Object getLastSelectedPathComponent() 方法获取当前被选中的结点
+	
+JTree监听事件
+------------------------------------
+JTree 专门提供了 一个 TreeSelectionModel 对象来保存该 JTree 选中状态的信息 。
+1. TreeSelectionModel.CONTIGUOUS_TREE_SELECTION: 可 以连续选中多个 TreePath 。
+2. TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION : 该选项对于选择没有任何限制 。
+3. TreeSelectionModel.SINGLE_TREE_SELECTION: 每次只能选择一个 TreePath 。
+
+为JTree添加监听器:
+1. addTreeExpansionListener(TreeExpansionListener tel) : 添加树节点展开/折叠事件的监听器。
+2. addTreeSelectionListener(TreeSelectionListener tsl) : 添加树节点选择事件的监听器。
+
+使用DefaultTreeCellRenderer改变结点外观
+------------------------------------
+- 使用 DefaultTreeCellRenderer 直接改变节点的外观，这种方式可 以 改变整棵树所有节点 的字体、颜色和图标 。
+- 为 JTree 指定 DefaultTreeCellRenderer 的扩展类对象作为 JTree 的节点绘制器，该绘制器负责为不同节点使用不同的字体、颜色和图标。通常使用这种方式来改变节点的外观 。
+- 为 JTree 指定一个实现 TreeCellRenderer 接口的节点绘制器，该绘制器可以为不同的节点自由绘制任意内容，这是最复杂但最灵活的节点绘制器 。
+
+setBackgroundNonSelectionColor(Color newColor): 设置用于非选定节点的背景颜色 。
+setBackgroundSelectionColor(Color newColor): 设置节点在选中状态下的背景颜色 。
+setBorderSelectionColor(Color newColor): 设置选中状态下节点的边框颜色 。
+setClosedIcon(Icon newIcon): 设置处于折叠状态下非叶子节点的图标 。
+setFont(Font font) : 设置节点文本 的 字体。
+setLeaflcon(Icon newIcon): 设置叶子节点的图标 。
+setOpenlcon(Icon newlcon): 设置处于展开状态下非叶子节 点的图标。
+setTextNonSelectionColor(Color newColor): 设置绘制非选中状态下节点文本的颜色 。
+setTextSelectionColor(Color newColor): 设置绘制选中状态下节点文本的颜色 。
+
+扩展DefaultTreeCellRenderer改变结点外观
+------------------------------------
+DefaultTreeCellRenderer 实现类实现了TreeCellRenderer接口
+该接口里只有 一个用于绘制节点内容的方法: getTreeCellRendererComponent()
+
+JTable、TableModel实现表格
+------------------------------------
+表格也是GUI程序中常用的组件，表格是一个由多行、多列组成的二维显示区
+Swing 的 JTable 以及相关类提供了这种表格支持
+
+JTable调整列
+------------------------------------
+1. JTable.AUTO_RESIZE_OFF: 关闭表格的自动调整功能。当调整某一列的宽度时，其他列的宽度不会发生变化；
+2. JTable.AUTO_RESIZE_NEXT_COLUMN:只调整下一列的宽度，其他列及表格的宽度不会发生改变；
+3. JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS:平均调整当前列后面所有列的宽度，当前列的前面所有列及表格的宽度都不会发生变化，这是默认的调整方式
+4. JTable.AUTO_RESIZE_LAST_COLUMN:只调整最后一列的宽度，其他列及表格的宽度不会发生变化；
+5. JTable.AUTO_RESIZE_ALL_COLUMNS:平均调整表格中所有列的宽度，表格的宽度不会发生改变
+
+TableColumn 具有如下方法 
+------------------------------------
+1. setMaxWidth(int maxWidth): 设置该列的最大宽度 。 如果指定的 maxWidth 小于该列的最小宽度， 则 maxWidth 被设置成最小宽度 。
+2. setMinWidth(int minWidth): 设置该列的最小宽度 。
+3. setPreferredWidth(int preferredWidth): 设置该列的最佳宽度 。
+4. setResizable(boolean isResizable): 设置是否可以调整该列的 宽度 。
+5. sizeWidthToFit(): 调整该列的宽度，以适合其标题单元格的 宽度 。
+
+JTable调整选择模式
+------------------------------------
+1. 选则行：JTable默认的选择方式就是选择行，也可以调用setRowSelectionAllowed(boolean rowSelectionAllowed)来修改；
+2. 选择列：调用 setColumnSelectionAllowed(boolean columnSelectionAllowed)方法，修改当前JTable的选择模式为列；
+3. 选择单元格：setCellSelectionEnabled(boolean cellSelectionEnabled) ，修改当前JTable的选择模式为单元格；
+
+JTable调整表格选择状态
+------------------------------------
+1. ListSelectionMode.MULTIPLE_INTERVAL_SELECTION:没有任何限制，可以选择表格中任何表格单元，这是默认的选择模式 。 通过 Shi负和 Ctrl 辅助键的帮助可以选择多个表格单元 。
+  
+2. ListSelectionMode.SINGLE_INTERVAL_SELECTION:选择单个连续区域，该选项可以选择多个表格单元，但多个表格单元之间必须是连续的 。 通过 Shift 辅助键的帮助来选择连续区域。
+  
+3. ListSelectionMode.SINGLE_SELECTION:只能选择单个表格单元 。
+
