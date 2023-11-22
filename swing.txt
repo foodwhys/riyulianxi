@@ -676,3 +676,36 @@ JTable调整表格选择状态
   
 3. ListSelectionMode.SINGLE_SELECTION:只能选择单个表格单元 。
 
+TableModel和监听器
+------------------------------------
+使用TableModel步骤：
+
+1. 自定义类，继承AbstractTableModel抽象类，重写下面几个方法：
+------------------------------------
+int getColumnCount():返回表格列的数量
+int getRowCount()：返回表格行的数量
+Object getValueAt(int rowIndex, int columnIndex)：返回rowIndex行，column列的单元格的值
+String getColumnName(int columnIndex)：返回columnIndex列的列名称
+boolean isCellEditable(int rowIndex, int columnIndex)：设置rowIndex行，columnIndex列单元格是否可编辑
+setValueAt(Object aValue, int rowIndex, int columnIndex)：设置rowIndex行，columnIndex列单元格的值
+
+
+addColumn(Object columnName)/addColumn(Object columnName, Object[] columnData):添加一列
+addRow(Object[] rowData)：添加一行
+insertRow(int row, Object[] rowData)：指定位置处插入一行
+removeRow(int row)：删除一行
+moveRow(int start, int end, int to)：移动指定范围内的数据行
+
+TableColumnModel和监听器
+------------------------------------
+1.addColumn(TableColumn aColumn): 该方法用于为 TableModel 添加一列 。 该方法主要用于将原来隐藏的数据列显示出来 。
+2.moveColumn(int columnIndex, int newIndex): 该方法用于将指定列移动到其他位置 。
+3.removeColumn(TableColumn column): 该方法用于从 TableModel 中删 除指定列。实际上，该方法并未真正删除指定列，只是将该列在TableColumnModel 中隐藏起来，使之不可见 。
+
+ddColumnModelListener()方法来添加监听器， 该监听器接口里包含如下几个方法 ：
+------------------------------------
+1. columnAdded(TableColumnModelEvent e) : 当向 TableColumnModel 里添加数据列时将会触发该方法。
+2. columnMarginChanged(ChangeEvent e) : 当由于页面距 ( Margin ) 的改变引起列状态改变时将会触发该方法 。
+3. columnMoved(TableColumnModelEvent e): 当移动 TableColumnModel 里的数据列时将会触发该方法 。
+4. columnRemoved(TableColumnModelEvent e): 当删除 TableColumnModel 里的数据列时将会触发该方法 。
+5. columnSelectionChanged(ListSelectionEvent e): 当改变表格的选择模式时将会触发该方法。
