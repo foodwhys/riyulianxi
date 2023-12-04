@@ -1,0 +1,76 @@
+1.Activiti的表说明
+	使用25张表
+	ACT_RE	流程定义和流程资源
+	ACT_RU	运行时，流程实例、任务、变量
+	ACT_HI	历史表
+	ACT_GE	通用表
+	
+2.Activiti的架构、类关系图
+	获取流程引擎的工具类
+	ProcessEngines 使用默认认证方式获取配置文件，构建流程引擎
+	配置文件名称activiti.cfg.xml，放在Classpath下
+	ProcessEngineConfigruation 可以自定义配置文件名
+	使用上面2个工具类，都可以获得流程引擎
+	ProcessEngine:流程引擎。获取各种服务接口
+	服务接口：用于流程部署、执行、管理，使用这些接口就是在操作对应的数据表
+	RepositoryService 资源管理类
+	RuntimeService 运行是管理类
+	TaskService 任务管理类
+	HistoryService 历史数据管理类
+	
+3.BPMN插件	
+	idea安装actiBPM插件
+
+4.流程符号、画流程图
+	流程符号：事件Event、活动Activitity、网关Gateway、流向
+	bpmn文件本质上是XML文件
+
+5.部署流程
+	使用Activiti提供API把流程图的内容写入数据库中
+	属于资源类操作，使用RepositoryService
+	单文件部署：把bpmn文件和png文件一个一个处理
+	压缩包部署：把 bpmn 文件和 png 打压缩包来处理
+	Deployment deploy = repositoryService.creatDeploymnet()
+	部署操作表：
+	act_re_deployment 部署表
+	act_re_procdef 流程定义表
+	act_ge_bytearray 资源表
+	
+6.起动流程实列
+	使用RuntimeService根据流程定义的key
+	核心代码：
+	ProcessInstance instance = runtimeService.startProcessInstanceBykey("myEvection")
+	操作表：
+	act_hi_actinst              流程实例执行的历史信息
+	act_hi_identitylink         流程参与用户的历史信息
+	act_hi_procinst             流程实例的历史信息
+	act_hi_taskint              流程任务的历史信息
+	act_ru_execution            流程执行信息
+	act_ru_identitylink         流程正在参与人的信息
+	act_ru_task                 流程当前任务信息
+	
+7.任务查询
+	使用TaskService，根据流程定义key，任务负责人来进行查询
+	核心代码：
+		List<Task> taskList = taskService.createTaskQuery()
+			.processDefinitionKey("myEvection") // 流程key
+			.taskAssignee("张三") // 要查询的负责人
+			.list(); 
+8.任务完成
+	使用TaskServcie，用任务id完成任务
+	核心代码：
+	taskService.complete("2505")
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	D:\日语记忆\riyulianxi
