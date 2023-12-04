@@ -62,6 +62,35 @@
 	taskService.complete("2505")
 	
 	
+day03总结
+1.流程定义查询
+	根据流程定义的key，查询流程定义信息
+
+2.流程删除
+	使用deploymentid删除流程
+
+3.流程资源下载
+	如果其他用户想要查看流程的资源文件，可以从数据库中把资源下载到本地
+
+4.流程历史信息查询
+HistoryService
+
+5.流程定义和流程实例
+	一个流程定义可以对应多个流程实例
+	如：公司有 出差申请流程 流程定义
+
+6.业务表示：Businesskey
+	可以查询自己的业务信息
+	如：校长出差 目的地 出差时长
+	使用RuntimeService
+	ProcessInstance instance = runtimeService.
+		startProcessInstanceBykey("myEvection","1002");
+
+7.挂起，激活流程实例
+	使用RuntimeService
+	单个挂起：操作流程实例。某个流程实例挂起则此流程不在继续执行，如果想想完成该实列则报错
+	全部挂起：操作流程定义。流程定义为挂起状态，在不允许添加新的实列，同时该流程定义下的实例全部挂起
+	RepositoryService 使用流程定义的Id来执行挂起或激活操作
 	
 	
 	
@@ -69,8 +98,3 @@
 	
 	
 	
-	
-	
-	
-	
-	D:\日语记忆\riyulianxi
