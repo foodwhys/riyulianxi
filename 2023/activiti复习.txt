@@ -14,7 +14,7 @@
 	ProcessEngine:流程引擎。获取各种服务接口
 	服务接口：用于流程部署、执行、管理，使用这些接口就是在操作对应的数据表
 	RepositoryService 资源管理类
-	RuntimeService 运行是管理类
+	RuntimeService 运行时管理类
 	TaskService 任务管理类
 	HistoryService 历史数据管理类
 	
@@ -93,8 +93,53 @@ HistoryService
 	RepositoryService 使用流程定义的Id来执行挂起或激活操作
 	
 	
-	
-	
-	
-	
-	
+总结
+-----------------
+Activiti 流程、实例、任务、变量相关表说明
+1.流程部署相关表
+	act_re_deployement 部署对象表
+	act_re_procdef 已部署的流程定义
+	act_ge_bytearray 资源文件表
+	act_ge_prperty 主键生成策略表（对于部署对象表的主键ID）
+
+2.流程实例相关表
+	act_ru_execution 正在执的执行对象
+	act_hi_procinst 流程实例历史表
+	act_hi_actinst 存放历史所有完成任务
+
+3.TasK任务相关
+	act_ru_task 代办任务表（只对应节点时UserTask）
+	act_hi_taskinst 代办任务历史表
+	act_hi_actinst 所有节点活动历史表
+
+4.流程变量表
+	act_ru_variable 正在执行的流程变量表
+	act_hi_variable 流程变量历史表
+
+Activiti数据表介绍
+-----------------
+| **表分类**   | **表名**              | **解释**                                                |
+| ------------ | --------------------- | ------------------------------------------------------- |
+| 一般数据     |                       |                                                         |
+|              | [ACT_GE_BYTEARRAY]    | 通用的流程定义和流程资源                                |
+|              | [ACT_GE_PROPERTY]     | 系统相关属性                                            |
+| 流程历史记录 |                       |                                                         |
+|              | [ACT_HI_ACTINST]      | 历史的流程实例                                          |
+|              | [ACT_HI_ATTACHMENT]   | 历史的流程附件                                          |
+|              | [ACT_HI_COMMENT]      | 历史的说明性信息                                        |
+|              | [ACT_HI_DETAIL]       | 历史的流程运行中的细节信息                              |
+|              | [ACT_HI_IDENTITYLINK] | 历史的流程运行过程中用户关系                            |
+|              | [ACT_HI_PROCINST]     | 历史的流程实例                                          |
+|              | [ACT_HI_TASKINST]     | 历史的任务实例                                          |
+|              | [ACT_HI_VARINST]      | 历史的流程运行中的变量信息                              |
+| 流程定义表   |                       |                                                         |
+|              | [ACT_RE_DEPLOYMENT]   | 部署单元信息                                            |
+|              | [ACT_RE_MODEL]        | 模型信息                                                |
+|              | [ACT_RE_PROCDEF]      | 已部署的流程定义                                        |
+| 运行实例表   |                       |                                                         |
+|              | [ACT_RU_EVENT_SUBSCR] | 运行时事件                                              |
+|              | [ACT_RU_EXECUTION]    | 运行时流程执行实例                                      |
+|              | [ACT_RU_IDENTITYLINK] | 运行时用户关系信息，存储任务节点与参与者的相关信息      |
+|              | [ACT_RU_JOB]          | 运行时作业                                              |
+|              | [ACT_RU_TASK]         | 运行时任务                                              |
+|              | [ACT_RU_VARIABLE]     | 运行时变量表                                            |
