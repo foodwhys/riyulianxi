@@ -97,24 +97,24 @@ HistoryService
 -----------------
 Activiti 流程、实例、任务、变量相关表说明
 1.流程部署相关表
-	act_re_deployment 部署对象表
-	act_re_procdef 已部署的流程定义
-	act_ge_bytearray 资源文件表
-	act_ge_property 主键生成策略表（对于部署对象表的主键ID）
+	act_re_deployment 部署单元信息
+	act_re_procdef    已部署的流程定义
+	act_ge_bytearray  资源文件表
+	act_ge_property   主键生成策略表（对于部署对象表的主键ID）
 
 2.流程实例相关表
-	act_ru_execution 正在执的执行对象
-	act_hi_procinst 流程实例历史表
-	act_hi_actinst 存放历史所有完成任务
+	act_ru_execution  正在执的执行对象
+	act_hi_procinst   流程实例历史表
+	act_hi_actinst    存放历史所有完成任务
 
 3.TasK任务相关
-	act_ru_task 运行时任务 （只对应节点时UserTask）
-	act_hi_taskinst 任务历史表
-	act_hi_actinst 所有节点活动历史表
+	act_ru_task       运行时任务 （只对应节点时UserTask）
+	act_hi_taskinst   任务历史表
+	act_hi_actinst    所有节点活动历史表
 
 4.流程变量表
-	act_ru_variable 正在执行的流程变量表
-	act_hi_variable 流程变量历史表
+	act_ru_variable   正在执行的流程变量表
+	act_hi_variable   流程变量历史表
 
 Activiti数据表介绍
 --------------------------------------------------------------------------------------------------
