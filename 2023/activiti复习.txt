@@ -10,7 +10,7 @@
 	ProcessEngines 使用默认认证方式获取配置文件，构建流程引擎
 	配置文件名称activiti.cfg.xml，放在Classpath下
 	ProcessEngineConfigruation 可以自定义配置文件名
-	使用上面2个工具类，都可以获得流程引擎
+	使用上面2个工具类，都可以获得流程引擎  
 	ProcessEngine:流程引擎。获取各种服务接口
 	服务接口：用于流程部署、执行、管理，使用这些接口就是在操作对应的数据表
 	RepositoryService 资源管理类
@@ -114,7 +114,7 @@ Activiti 流程、实例、任务、变量相关表说明
 
 4.流程变量表
 	act_ru_variable   正在执行的流程变量表
-	act_hi_variable   流程变量历史表
+	act_hi_varinst   流程变量历史表
 
 Activiti数据表介绍
 --------------------------------------------------------------------------------------------------
