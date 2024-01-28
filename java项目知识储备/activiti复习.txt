@@ -1,0 +1,168 @@
+1.Activiti的表说明
+	使用25张表
+	ACT_RE	流程定义和流程资源
+	ACT_RU	运行时，流程实例、任务、变量
+	ACT_HI	历史表
+	ACT_GE	通用表
+	
+2.Activiti的架构、类关系图
+	获取流程引擎的工具类
+	ProcessEngines 使用默认认证方式获取配置文件，构建流程引擎
+	配置文件名称activiti.cfg.xml，放在Classpath下
+	ProcessEngineConfigruation 可以自定义配置文件名
+	使用上面2个工具类，都可以获得流程引擎  
+	ProcessEngine:流程引擎。获取各种服务接口
+	服务接口：用于流程部署、执行、管理，使用这些接口就是在操作对应的数据表
+	RepositoryService 资源管理类
+	RuntimeService 运行时管理类
+	TaskService 任务管理类
+	HistoryService 历史数据管理类
+	
+3.BPMN插件	
+	idea安装actiBPM插件
+
+4.流程符号、画流程图
+	流程符号：事件Event、活动Activitity、网关Gateway、流向
+	bpmn文件本质上是XML文件
+
+5.部署流程
+	使用Activiti提供API把流程图的内容写入数据库中
+	属于资源类操作，使用RepositoryService
+	单文件部署：把bpmn文件和png文件一个一个处理
+	压缩包部署：把 bpmn 文件和 png 打压缩包来处理
+	Deployment deploy = repositoryService.creatDeploymnet()
+	部署操作表：
+	act_re_deployment 部署表
+	act_re_procdef 流程定义表
+	act_ge_bytearray 资源表
+	
+6.起动流程实列
+	使用RuntimeService根据流程定义的key
+	核心代码：
+	ProcessInstance instance = runtimeService.startProcessInstanceBykey("myEvection")
+	操作表：
+	act_hi_actinst              流程实例执行的历史信息
+	act_hi_identitylink         流程参与用户的历史信息
+	act_hi_procinst             流程实例的历史信息
+	act_hi_taskint              流程任务的历史信息
+	act_ru_execution            流程执行信息
+	act_ru_identitylink         流程正在参与人的信息
+	act_ru_task                 流程当前任务信息
+	
+7.任务查询
+	使用TaskService，根据流程定义key，任务负责人来进行查询
+	核心代码：
+		List<Task> taskList = taskService.createTaskQuery()
+			.processDefinitionKey("myEvection") // 流程key
+			.taskAssignee("张三") // 要查询的负责人
+			.list(); 
+8.任务完成
+	使用TaskServcie，用任务id完成任务
+	核心代码：
+	taskService.complete("2505")
+	
+	
+day03总结
+1.流程定义查询
+	根据流程定义的key，查询流程定义信息
+
+2.流程删除
+	使用deploymentid删除流程
+
+3.流程资源下载
+	如果其他用户想要查看流程的资源文件，可以从数据库中把资源下载到本地
+
+4.流程历史信息查询
+HistoryService
+
+5.流程定义和流程实例
+	一个流程定义可以对应多个流程实例
+	如：公司有 出差申请流程 流程定义
+
+6.业务表示：Businesskey
+	可以查询自己的业务信息
+	如：校长出差 目的地 出差时长
+	使用RuntimeService
+	ProcessInstance instance = runtimeService.
+		startProcessInstanceBykey("myEvection","1002");
+
+7.挂起，激活流程实例
+	使用RuntimeService
+	单个挂起：操作流程实例。某个流程实例挂起则此流程不在继续执行，如果想想完成该实列则报错
+	全部挂起：操作流程定义。流程定义为挂起状态，在不允许添加新的实列，同时该流程定义下的实例全部挂起
+	RepositoryService 使用流程定义的Id来执行挂起或激活操作
+	
+	
+总结
+-----------------
+Activiti 流程、实例、任务、变量相关表说明
+1.流程部署相关表
+	act_re_deployment 部署单元信息
+	act_re_procdef    已部署的流程定义
+	act_ge_bytearray  资源文件表
+	act_ge_property   主键生成策略表（对于部署对象表的主键ID）
+
+2.流程实例相关表
+	act_ru_execution  正在执的执行对象
+	act_hi_procinst   流程实例历史表
+	act_hi_actinst    存放历史所有完成任务
+
+3.TasK任务相关
+	act_ru_task       运行时任务 （只对应节点时UserTask）
+	act_hi_taskinst   任务历史表
+	act_hi_actinst    所有节点活动历史表
+
+4.流程变量表
+	act_ru_variable   正在执行的流程变量表
+	act_hi_varinst   流程变量历史表
+
+Activiti数据表介绍
+--------------------------------------------------------------------------------------------------
+| **表分类**   | **表名**              | **解释**                                                |
+| ------------ | --------------------- | ------------------------------------------------------- |
+| 一般数据     |                       |                                                         |
+|              | [ACT_GE_BYTEARRAY]    | 通用的流程定义和流程资源                                |
+|              | [ACT_GE_PROPERTY]     | 系统相关属性                                            |
+| 流程历史记录 |                       |                                                         |
+|              | [ACT_HI_ACTINST]      | 历史的流程实例                                          |
+|              | [ACT_HI_ATTACHMENT]   | 历史的流程附件                                          |
+|              | [ACT_HI_COMMENT]      | 历史的说明性信息                                        |
+|              | [ACT_HI_DETAIL]       | 历史的流程运行中的细节信息                              |
+|              | [ACT_HI_IDENTITYLINK] | 历史的流程运行过程中用户关系                            |
+|              | [ACT_HI_PROCINST]     | 历史的流程实例                                          |
+|              | [ACT_HI_TASKINST]     | 历史的任务实例                                          |
+|              | [ACT_HI_VARINST]      | 历史的流程运行中的变量信息                              |
+| 流程定义表   |                       |                                                         |
+|              | [ACT_RE_DEPLOYMENT]   | 部署单元信息                                            |
+|              | [ACT_RE_MODEL]        | 模型信息                                                |
+|              | [ACT_RE_PROCDEF]      | 已部署的流程定义                                        |
+| 运行实例表   |                       |                                                         |
+|              | [ACT_RU_EVENT_SUBSCR] | 运行时事件                                              |
+|              | [ACT_RU_EXECUTION]    | 运行时流程执行实例                                      |
+|              | [ACT_RU_IDENTITYLINK] | 运行时用户关系信息，存储任务节点与参与者的相关信息      |
+|              | [ACT_RU_JOB]          | 运行时作业                                              |
+|              | [ACT_RU_TASK]         | 运行时任务                                              |
+|              | [ACT_RU_VARIABLE]     | 运行时变量表                                            |
+--------------------------------------------------------------------------------------------------
+
+
+排他网关ExclusiveGateway
+---------------------------------------------
+排他网关，用来在流程中实现决策。 当流程执行到这个网关，所有分支都会判断条件是否为true，如果为true则执行该分支，
+
+并行网关ParallelGateway 符号 +
+---------------------------------------------
+并行网关允许将流程分成多条分支，也可以把多条分支汇聚到一起，
+并行网关的功能是基于进入和外出顺序流的
+
+包含网关InclusiveGateway
+---------------------------------------------
+包含网关可以看做是排他网关和并行网关的结合体
+
+事件网关EventGateway
+---------------------------------------------
+事件网关允许根据事件判断流向。网关的每个外出顺序流都要连接到一个中间捕获事件。 
+当流程到达一个基于事件网关，网关会进入等待状态：会暂停执行。
+与此同时，会为每个外出顺序流创建相对的事件订阅。
+事件网关的外出顺序流和普通顺序流不同，这些顺序流不会真的"执行"， 相反它们让流程引擎去决定
+
