@@ -669,3 +669,221 @@ executeSingleResult(UserQuery userQuery) {
  
 修改用户
 --------------------------------
+Activiti通过IdentityService服务修改用户的步骤如下
+ 获取单个User实例；
+ 调用setter()方法为User实例设置新属性值；
+ 调用IdentityService接口的saveUser(User user)方法将User实例更新保存到数据库
+ 
+updateUser(IdentityService identityService, String id, 
+ String newLastName, String newFirstName, String newEmail, String newPassword) { 
+	 //查询用户信息
+	 User user = executeSingleResult(identityService.createUserQuery().userId(id)); 
+	 
+	 //调用setter()方法为创建的User实例设置属性值
+	 user.setFirstName(newFirstName); 
+	 user.setLastName(newLastName); 
+	 user.setEmail(newEmail); 
+	 user.setPassword(newPassword); 
+	 
+	 //调用IdentityService的saveUser()方法将User实例存储到数据库
+	 identityService.saveUser(user); 
+}
+
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //新建用户
+ UserUtil.addUser(identityService, 
+ "hebo", "贺", "波", "hebo824@163.com", "******"); 
+ 
+ //查询用户信息
+ User oldUser = UserUtil
+ .executeSingleResult(identityService.createUserQuery().userId("hebo")); 
+ 
+ //输出原始用户信息
+ log.info("修改前：id：{}，email：{}，password：{}", 
+ oldUser.getId(), oldUser.getEmail(), oldUser.getPassword()); 
+ 
+ //修改用户邮箱和密码
+ UserUtil.updateUser(identityService, "hebo", oldUser.getFirstName(), 
+ oldUser.getLastName(), "hebo@activiti.com", "######"); 
+ 
+ //再次查询用户信息
+ User newUser = UserUtil.executeSingleResult(identityService.createUserQuery().userId("hebo")); 
+ log.info("修改后：id：{}，email：{}，password：{}", newUser.getId(), newUser.getEmail(),newUser.getPassword()); 
+
+删除用户 代码示例
+--------------------------------
+deleteUser(IdentityService identityService, String id) { 
+ identityService.deleteUser(id); 
+}
+
+//加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //新建用户
+ UserUtil.addUser(identityService, "zhangsan", "张", "三", "zhangsan@qq.com", "******"); 
+ 
+ //查询用户信息
+ User user = UserUtil.executeSingleResult(identityService.createUserQuery() .userId("zhangsan")); 
+ log.info("用户编号：{}，姓名：{}，邮箱：{}", user.getId(), user.getLastName() +  user.getFirstName(), user.getEmail()); 
+ 
+ //删除用户
+ UserUtil.deleteUser(identityService,"zhangsan");
+ 
+ //再次查询用户信息
+ user = UserUtil.executeSingleResult(identityService.createUserQuery().userId("zhangsan")); 
+ if (user == null) { 
+	log.error("用户编号为{}的用户不存在", "zhangsan"); 
+ }
+
+ 
+设置用户图片 代码示例
+--------------------------------
+setPictureForUser(IdentityService identityService, String userId, File userPictureFile) {
+	
+	FileInputStream fileInputStream = new FileInputStream(userPictureFile); 
+	BufferedImage bufferedImage = ImageIO.read(fileInputStream); 
+	ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); 
+	ImageIO.write(bufferedImage, "png", outputStream); 
+	//将图片转换为byte数组
+	byte[] pictureArray = outputStream.toByteArray(); 
+	
+	//创建用户图片的Picture实例
+	Picture userPicture = new Picture(pictureArray, "the picture of user:" + userId);
+	
+	//为用户设置图片
+	identityService.setUserPicture(userId, userPicture);
+ }
+ 
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //新建用户
+ UserUtil.addUser(identityService, 
+ "hebo", "贺", "波", "hebo824@163.com", "******"); 
+ //读取图片
+ URL resource = RunSetUserPictureDemo.class.getClassLoader().getResource("pictures/photo.png"); 
+ File userPictureFile = new File(resource.getPath()); 
+ //为用户设置图片
+ UserUtil.setPictureForUser(identityService, "hebo", userPictureFile);
+ 
+用户组管理
+--------------------------------
+一个Group实例对应ACT_ID_GROUP表中的一条数据
+ id：用户组ID，对应ACT_ID_GROUP表的ID_字段（主键）。
+ name：用户组名称，对应ACT_ID_GROUP表的NAME_字段。
+ type：用户组类型，对应ACT_ID_GROUP表的TYPE_字段。
+ revision：用户组的数据版本，对应ACT_ID_GROUP表的REV_字段。
+IdentityService对用户组的操作均围绕Group进行
+
+用户组添加 示例代码
+--------------------------------
+addGroup(IdentityService identityService, String id, String name, String type) { 
+ //调用IdentityService的newUser()方法创建User实例
+ Group newGroup = identityService.newGroup(id); 
+ //调用setter()方法为创建的User实例设置属性值
+ newGroup.setName(name); 
+ newGroup.setType(type); 
+ //调用IdentityService的saveGroup()方法将Group实例保存到数据库
+ identityService.saveGroup(newGroup); 
+}
+
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ GroupUtil.addGroup(identityService,"process_platform_department", "流程平台部", "department");
+ 
+查询用户组
+--------------------------------
+
+list()方法
+--------------------------------
+executeList(GroupQuery groupQuery) { 
+ List<Group> list = groupQuery.list();
+ for (Group group : list) { 
+	 log.info("
+	 用户组编号：{}，
+	 名称：{}，
+	 类型：{}",
+	 group.getId(), 
+	 group.getName(), 
+	 group.getType()); 
+ } 
+}
+
+ //根据查询条件查询用户组并输出用户组信息
+ GroupQuery groupQuery = identityService.createGroupQuery()
+ .groupType("department")
+ .orderByGroupId()
+ .asc();
+ GroupUtil.executeList(groupQuery);
+ 
+listPage()方法
+--------------------------------
+executeListPage(GroupQuery groupQuery, int firstResult, int maxResults) { 
+ List<Group> list = groupQuery.listPage(firstResult, maxResults); 
+ for (Group group : list) { 
+	log.info("用户组编号：{}，名称：{}，类型：{}", group.getId(), group.getName(), group.getType()); 
+ } 
+}
+
+ GroupQuery groupQuery = identityService.createGroupQuery()
+ .groupType("department")
+ .orderByGroupId()
+ .asc();
+ GroupUtil.executeListPage(groupQuery,1,3);
+ 
+count()方法
+--------------------------------
+executeCount(GroupQuery groupQuery) { 
+ long groupNum = groupQuery.count(); 
+ log.info("用户组数为：{}", groupNum); 
+}
+
+ //创建GroupQuery
+ GroupQuery groupQuery = identityService.createGroupQuery().groupType("department");
+ //统计用户组数量
+ GroupUtil.executeCount(groupQuery);
+ 
+singleResult()方法 示例代码
+--------------------------------
+executeSingleResult(GroupQuery groupQuery) { 
+ Group group = groupQuery.singleResult(); 
+ return group; 
+}
+
+ //创建GroupQuery
+ GroupQuery groupQuery = identityService
+ .createGroupQuery()
+ .groupId("process_platform_department")
+ .groupType("department");
+ //查询单个用户组
+ GroupUtil.executeSingleResult(groupQuery);
+ 
+修改用户组
+--------------------------------
+updateGroup(IdentityService identityService, String groupId, String newName, String newType) { 
+ //查询用户组信息
+ Group group = executeSingleResult(identityService.createGroupQuery().groupId(groupId)); 
+ 
+ //调用setter()方法为创建的Group实例设置属性值
+ group.setName(newName); 
+ group.setType(newType); 
+ 
+ //调用IdentityService的saveGroup()方法将Group实例保存到数据库
+ identityService.saveGroup(group); 
+}
+
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //修改用户组信息
+ GroupUtil.updateGroup(identityService,"process_platform_department","BPM平台部", "department");
+ 
+删除用户组
+--------------------------------
+deleteGroup(IdentityService identityService, String groupId) {
+	identityService.deleteGroup(groupId); 
+}
+
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //删除用户组
+ GroupUtil.deleteGroup(identityService,"testGroup");
+ 
