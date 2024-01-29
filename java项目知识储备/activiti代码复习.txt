@@ -887,3 +887,87 @@ deleteGroup(IdentityService identityService, String groupId) {
  //删除用户组
  GroupUtil.deleteGroup(identityService,"testGroup");
  
+用户与用户组关系管理
+--------------------------------
+过ACT_ID_MEMBERSHIP表存储用户与用户组的关联关系数据
+
+添加用户至用户组
+--------------------------------
+addUserToGroup(IdentityService identityService, String userId, String groupId) { 
+ identityService.createMembership(userId, groupId); 
+}
+
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ 
+ //新建用户
+ UserUtil.addUser(identityService, "hebo", "贺", "波", "hebo@activiti.com", "******"); 
+ 
+ //新建用户组
+ GroupUtil.addGroup(identityService,"process_platform_department","流程平台部", "department"); 
+ 
+ //将用户加入用户组
+ identityService.createMembership("hebo", "process_platform_department");
+ 
+从用户组中移除用户
+--------------------------------
+removeUserFromGroup(IdentityService identityService, String userId, String groupId) { 
+ identityService.deleteMembership(userId, groupId); 
+}
+
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //将用户从用户组中移除
+ GroupUtil.removeUserFromGroup(identityService, "zhangsan", "testgroup");
+ 
+查询用户组中的用户
+--------------------------------
+runRemoveUserFromGroupDemo() { 
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //将用户从用户组中移除
+ GroupUtil.removeUserFromGroup(identityService, "zhangsan", "testgroup"); 
+}
+
+ //查询用户组中的用户
+ UserQuery userQuery = identityService.createUserQuery()
+ .memberOfGroup("process_platform_department")
+ .orderByUserId()
+ .asc();
+ UserUtil.executeList(userQuery);
+
+查询用户所在的用户组
+--------------------------------
+ //查询用户所在的用户组列表
+ GroupQuery groupQuery = identityService.createGroupQuery()
+ .groupMember("hebo")
+ .orderByGroupId()
+ .asc();
+ GroupUtil.executeList(groupQuery);
+ 
+用户附加信息管理
+--------------------------------
+Activiti默认的用户信息往往无法满足实际应用场景的需要
+ACT_ID_INFO表可用于存储用户附加信息数据
+
+用户附加信息 示例代码
+--------------------------------
+ //添加附加信息
+ identityService.setUserInfo("hebo", "mobile", "13999999999"); 
+ identityService.setUserInfo("hebo", "sex","男");
+
+ //删除用户扩展属性可以通过调用IdentityService的deleteUserInfo()方法来实现，示例代码如下：
+ identityService.deleteUserInfo("hebo","sex");
+
+ //查询用户某个扩展属性的值
+ String mobileStr = identityService.getUserInfo("hebo","mobile"); 
+ log.info("mobileStr：{}", mobileStr);
+ 
+getUserInfoKeys()方法查询用户所有扩展属性
+--------------------------------
+List<String> userInfoKeys = identityService.getUserInfoKeys("hebo"); 
+for (String userInfoKey : userInfoKeys) { 
+ String value = identityService.getUserInfo("hebo", userInfoKey); 
+ log.info("userInfoKey：{}，value：{}", userInfoKey, value); 
+}
+
