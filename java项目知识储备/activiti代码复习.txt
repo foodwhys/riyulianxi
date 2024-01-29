@@ -7,6 +7,9 @@
  //创建工作流引擎
  ProcessEngine engine = processEngineConfiguration.buildProcessEngine();
 
+第八章 核心API
+--------------------------------
+
 --------------------------------
 存储服务API
 --------------------------------
@@ -374,4 +377,295 @@ ManagementService接口中关于异步任务管理的方法
  用ManagementService()的moveTimerToExecutableJob()方法将定时任务移入执行任务列表
  用ManagementService的executeJob()方法立即执行该任务
  
+执行命令
+--------------------------------
+ManagementService接口提供了两个executeCommand()方法用于执行自定义命令
+
+执行命令 示例代码
+--------------------------------
+ //初始化工作流引擎
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
  
+ //准备参数
+ Date curDate = new Date(); 
+ System.out.println("当前时间为：" + curDate); 
+ String express = "${dateFormat.format(date)}"; 
+ Map<String, Object> variableMap = new HashMap<>(); 
+ variableMap.put("date", curDate); 
+ variableMap.put("dateFormat", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")); 
+ 
+ //调用执行表达式的CMD 
+ Object result = managementService
+ .executeCommand(new ExecuteExpressionCmd(express, variableMap));
+ System.out.println("格式化后：" + result); 
+ 
+ //关闭工作流引擎
+ closeEngine();
+
+--------------------------------
+身份服务API
+--------------------------------
+Activiti使用ACT_ID_GROUP、ACT_ID_USER和ACT_ID_MEMBERSHIP这3张表维护人员组织架构
+
+IdentityService接口方法
+--------------------------------
+ //新建用户
+ User newUser(String userId); 
+ //保存用户
+ void saveUser(User user); 
+ //创建用户查询
+ UserQuery createUserQuery(); 
+ //创建本地SQL查询
+ NativeUserQuery createNativeUserQuery(); 
+ //删除用户
+ void deleteUser(String userId); 
+ 
+ //新建组
+ Group newGroup(String groupId); 
+ //创建组查询对象
+ GroupQuery createGroupQuery(); 
+ //创建本地组SQL查询
+ NativeGroupQuery createNativeGroupQuery(); 
+ //保存组
+ void saveGroup(Group group); 
+ //删除组
+ void deleteGroup(String groupId); 
+ 
+ //创建用户与组的关系
+ void createMembership(String userId, String groupId); 
+ //删除用户与组的关系
+ void deleteMembership(String userId, String groupId);
+ 
+IdentityService接口主要提供以下3类方法。
+--------------------------------
+ 与用户管理相关的方法：包括新建用户、保存用户、查询用户、删除用户等。
+ 与组管理相关的方法：包括新建组、保存组、查询组、删除组等。
+ 维护用户与组的关系的方法：包括新建关系、删除关系等。
+
+身份服务示例代码
+--------------------------------
+ //初始化工作流引擎
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ 
+ //创建用户1 
+ User user1 = identityService.newUser("huhaiqin"); 
+ user1.setFirstName("胡"); 
+ user1.setLastName("海琴"); 
+ user1.setEmail("huhaiqin@activiti.org"); 
+ 
+ //保存用户1 
+ identityService.saveUser(user1); 
+ 
+ //创建用户2 
+ User user2 = identityService.newUser("liuxiaopeng"); 
+ user2.setFirstName("刘"); 
+ user2.setLastName("晓鹏"); 
+ user2.setEmail("liuxiaopeng@activiti.org"); 
+ 
+ //保存用户2 
+ identityService.saveUser(user2); 
+ 
+ //创建用户3 
+ User user3 = identityService.newUser("hebo"); 
+ user3.setFirstName("贺"); 
+ user3.setLastName("波"); 
+ user3.setEmail("hebo@activiti.org"); 
+ 
+ //保存用户3 
+ identityService.saveUser(user3); 
+ 
+ //创建组1 
+ Group group1 = identityService.newGroup("group1"); 
+ group1.setName("Group1"); 
+ 
+ //保存组1 
+ identityService.saveGroup(group1); 
+ 
+ //创建组2 
+ Group group2 = identityService.newGroup("group2"); 
+ group2.setName("Group2");
+ 
+//查询组和用户
+ List<Group> groups = identityService.createGroupQuery().list(); 
+ for (Group group : groups) { 
+ 
+	 System.out.println(
+	 "组名：" + group.getName() + 
+	 "组ID：" + group.getId()); 
+	 
+	 String groupId = group.getId(); 
+	 List<User> users = identityService
+	 .createUserQuery()
+	 .memberOfGroup(groupId)
+	 .list(); 
+	 for (User user : users) { 
+		 System.out.println(
+		 "成员ID：" + user.getId()  + 
+		 "姓名："   + user.getFirstName() + user.getLastName() +
+		 "邮箱："   + user.getEmail()); 
+	 } 
+ } 
+ //关闭工作流引擎
+ closeEngine();
+
+--------------------------------
+第九章 Activiti身份管理
+--------------------------------
+
+用户管理
+--------------------------------
+ 表ACT_ID_USER表用于存储用户数据
+ 一个User实例对应ACT_ID_USER表中的一条数据
+ 
+USER表字段
+-------------------------------- 
+ id：用户ID，对应ACT_ID_USER表的ID_字段（主键）。
+ firstName：用户的名称，对应ACT_ID_USER表的FIRST_字段。
+ lastName：用户的姓氏，对应ACT_ID_USER表的LAST_字段。
+ email：用户的电子邮箱，对应ACT_ID_USER表的EMAIL_字段。
+ password：用户的密码，对应ACT_ID_USER表的PWD_字段。
+ pictureByteArrayRef：用户的图片对象，其id属性对应ACT_ID_USER表的PICTURE_ID_字段。
+ PICTURE_ ID_字段存储ACT_GE_BYTEARRAY表中存储图片二进制流记录的ID_字段的值。
+ revision：用户的数据版本，对应ACT_ID_USER表的REV_字段。
+ 
+ Activiti的org.activiti.engine.identity包主要用于进行身份管理和认证，
+ 基于IdentityService接口实现，IdentityService接口所有用户操作均围绕User进行
+ 
+ 
+新建用户 示例代码
+--------------------------------
+ //调用IdentityService接口的newUser()方法创建User实例
+ User newUser = identityService.newUser(id); 
+ 
+ //调用setter()方法为创建的User实例设置属性值
+ newUser.setFirstName(firstName); 
+ newUser.setLastName(lastName); 
+ newUser.setEmail(email);
+ newUser.setPassword(password); 
+ 
+ //调用IdentityService接口的saveUser()方法，将User实例存储到数据库
+ identityService.saveUser(newUser);
+ 
+查询用户
+--------------------------------
+ IdentityService提供了createUserQuery()方法
+ createUserQuery()方法返回一个org.activiti.engine.query.Query实例
+ Query是所有查询对象的父接口，定义了多种查询相关的方法，分别介绍如下
+ asc()：设置查询结果的排序方式为升序。
+ desc()：设置查询结果的排序方式为降序。
+ list()：返回查询结果的集合，如果查不到，则返回一个空的集合。
+ listPage()：分页返回查询结果的集合。
+ count()：返回查询结果的数量。
+ singleResult()：查询单条符合条件的记录。如果查询不到，则返回null；如果查询到多条记录，则抛出异常
+ 
+list()方法
+--------------------------------
+Query接口list()方法以集合形式返回查询对象实体数据
+
+示例代码
+--------------------------------
+
+List<User> users = userQuery.list(); 
+ for (User user : users) { 
+	 log.info(
+	 "用户编号：{}，
+	 姓名：{}，
+	 邮箱：{}",
+	 user.getId(), 
+	 user.getLastName() + 
+	 user.getFirstName() , 
+	 user.getEmail()); 
+ }
+ 
+
+Activiti用户查询API支持的查询条件方法
+--------------------------------
+executeList(UserQuery userQuery) { 
+ List<User> users = userQuery.list(); 
+ for (User user : users) { 
+	 log.info(
+	 "用户编号：{}，
+	 姓名：{}，
+	 邮箱：{}", 
+	 user.getId(), 
+	 user. getLastName() + 
+	 user.getFirstName() , 
+	 user.getEmail()); 
+ } 
+}
+
+ //根据查询条件查询匹配用户并输出用户信息
+ UserQuery userQuery = identityService
+ .createUserQuery()
+ .userLastName("贺")
+ .userEmailLike("%163.com%")
+ .orderByUserId()
+ .asc();
+ UserUtil.executeList(userQuery);
+ 
+
+以按照多个字段进行排序，如根据firstName降序排序后根据id升序排序
+--------------------------------
+ //根据查询条件查询用户并输出用户信息
+ UserQuery userQuery = identityService.createUserQuery()
+ .orderByUserLasttName().desc()
+ .orderByUserId().asc();
+ UserUtil.executeList(userQuery);
+ 
+listPage()方法
+--------------------------------
+listPage()方法比list()方法多了firstResult和maxResults两个参数
+listPage()方法同样支持链式编程
+
+listPage()方法 示例代码
+--------------------------------
+executeListPage(UserQuery userQuery, int firstResult, int maxResults) {
+	List<User> users = userQuery.listPage(firstResult, maxResults); 
+	 for (User user : users) { 
+		 log.info("用户编号：{}，姓名：{}，邮箱：{}", user.getId(), user.getLastName() + user.getFirstName() , user.getEmail()); 
+	 }
+}
+
+ //分页查询用户并输出用户信息
+ UserQuery userQuery = identityService.createUserQuery()
+ .userEmailLike("%he%")
+ .orderByUserId()
+ .desc();
+ 
+ UserUtil.executeListPage(userQuery, 1, 3);
+
+count()方法
+--------------------------------
+调用count()方法可统计符合查询条件的查询结果的用户数量
+
+示例代码
+--------------------------------
+executeCount(UserQuery userQuery) { 
+ long userNum = userQuery.count();
+ log.info("用户数为：{}", userNum); 
+}
+
+ //查询符合查询条件的用户数
+ UserQuery userQuery = identityService.createUserQuery()
+ .userLastName("贺")
+ .userEmailLike("%he%");
+ UserUtil.executeCount(userQuery);
+
+singleResult()方法
+--------------------------------
+如果符合查询条件的记录多于一条，
+Activiti会抛出org.activiti.engine.ActivitiException异常
+
+executeSingleResult(UserQuery userQuery) { 
+ User user = userQuery.singleResult();
+ return user; 
+}
+
+ //查询符合条件的单个用户
+ UserQuery userQuery = identityService.createUserQuery() 
+ .userLastName("贺") 
+ .userFirstName("波"); 
+ User user = UserUtil.executeSingleResult(userQuery);
+ 
+修改用户
+--------------------------------
