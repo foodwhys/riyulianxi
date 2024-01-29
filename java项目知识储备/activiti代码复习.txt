@@ -262,4 +262,116 @@ taskService任务执行
  流程实例ID：5，业务主键：code_1，创建时间：2022-04-17 12:16:37.777 
  流程实例ID：10，业务主键：code_2，创建时间：2022-04-17 12:16:37.804 
  流程实例ID：15，业务主键：code_3，创建时间：2022-04-17 12:16:37.810
+
+-------------------------------- 
+管理服务API
+--------------------------------
+
+数据库管理
+--------------------------------
+ManagementService主要提供数据表和表元数据的管理和查询服务。
+
+ //获取Activiti数据表名称和数据量
+ Map<String, Long> getTableCount(); 
+ //获取实体对应的表名
+ String getTableName(Class<?> activitiEntityClass); 
+ //查询指定表的元数据
+ TableMetaData getTableMetaData(String tableName); 
+ //获取表的分页查询对象
+ TablePageQuery createTablePageQuery(); 
+ //更新数据库schema 
+ String databaseSchemaUpgrade(Connection connection, String catalog, String schema);
+ 
+数据库管理代码示例
+--------------------------------
+ //获取数据表的名称及元数据
+ String tableName = managementService
+ .getTableName(HistoricProcessInstanceEntity.class); 
+ 
+ System.out.println("HistoricProcessInstanceEntity对应的表名为：" + tableName);
+ 
+ TableMetaData tableMetaData = managementService
+ .getTableMetaData(tableName); 
+ 
+ List<String> columnNames = tableMetaData
+ .getColumnNames(); 
+ for (String columnName : columnNames) { 
+	System.out.println("--字段：" + columnName); 
+ }
+ 
+ //获取表的分页查询对象
+ TablePage tablePage = managementService
+ .createTablePageQuery() 
+ .tableName(tableName) 
+ .orderAsc("START_TIME_") 
+ .listPage(1, 10); 
+ 
+ System.out.println(tableName + "的记录数为：" + tablePage.getTotal());
+ 
+异步任务管理
+--------------------------------
+ManagementService接口中关于异步任务管理的方法
+
+ // 获取异步任务查询对象
+ JobQuery createJobQuery(); 
+ // 获取定时任务查询对象
+ TimerJobQuery createTimerJobQuery(); 
+ // 获取挂起任务查询对象
+ SuspendedJobQuery createSuspendedJobQuery(); 
+ // 获取不可执行任务查询对象
+ DeadLetterJobQuery createDeadLetterJobQuery(); 
+ // 强制执行任务
+ void executeJob(String jobId); 
+ // 将定时任务移入可执行任务
+ Job moveTimerToExecutableJob(String jobId); 
+ // 将任务移入不可执行任务
+ Job moveJobToDeadLetterJob(String jobId); 
+ // 将不可执行任务重新加入可执行任务
+ Job moveDeadLetterJobToExecutableJob(String jobId, int retries); 
+ // 删除异步任务
+ void deleteJob(String jobId); 
+ // 删除定时任务
+ void deleteTimerJob(String jobId); 
+ // 删除不可执行的任务
+ void deleteDeadLetterJob(String jobId); 
+ // 设置异步任务剩余重试次数
+ void setJobRetries(String jobId, int retries); 
+ // 设置定时任务剩余重试次数
+ void setTimerJobRetries(String jobId, int retries); 
+ // 获取异步任务异常栈
+ String getJobExceptionStacktrace(String jobId); 
+ // 获取定时任务异常栈
+ String getTimerJobExceptionStacktrace(String jobId); 
+ // 获取挂起任务异常栈
+ String getSuspendedJobExceptionStacktrace(String jobId); 
+ // 获取不可执行的任务异常栈
+ String getDeadLetterJobExceptionStacktrace(String jobId);
+ 
+ 
+代码示例
+--------------------------------
+ //查询第一个任务
+ Task firstTask = taskService.createTaskQuery().processInstanceId( 
+ processInstance.getId()).singleResult(); 
+ //完成第一个任务
+ taskService.complete(firstTask.getId()); 
+ // 查询流程实例ID对应的job任务列表
+ List<Job> timerJobs = managementService
+ .createTimerJobQuery()
+ .processInstanceId(processInstance.getId())
+ .list();
+ for (Job job : timerJobs) { 
+	 System.out.println(
+	 "定时任务" + job.getId() + 
+	 "类型：" + job.getJobType() + 
+	 "定时执行时间：" + dateFormat.format(job.getDuedate())); 
+	 
+	 managementService.moveTimerToExecutableJob(job.getId());
+	 System.out.println("----立即执行任务" + job.getId()); 
+	 managementService.executeJob(job.getId());
+ }
+ 用ManagementService接口的createTimerJobQuery()方法查询定时任务
+ 用ManagementService()的moveTimerToExecutableJob()方法将定时任务移入执行任务列表
+ 用ManagementService的executeJob()方法立即执行该任务
+ 
  
