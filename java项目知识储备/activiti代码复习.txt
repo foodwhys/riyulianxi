@@ -971,3 +971,135 @@ for (String userInfoKey : userInfoKeys) {
  log.info("userInfoKey：{}，value：{}", userInfoKey, value); 
 }
 
+--------------------------------
+第十章 Activiti流程部署
+--------------------------------
+
+最常用的流程资源包括以下几种
+--------------------------------
+ 流程定义文件：扩展名为.bpmn20.xm1或.bpmn。
+ 流程定义图片：用遵循BPMN 2.0规范的各种图形描绘的图片，通常为.png格式。
+ 表单文件：用于存储流程挂载的表单内容的文件，扩展名为.form。一个流程可以挂载多个表单。
+ 规则文件：使用Drools语法定义的规则，扩展名为.dr1。
+ 
+流程部署
+--------------------------------
+第8章介绍过RepositoryService接口主要负责流程部署及流程定义管理
+该接口提供了一个createDeployment()方法用于创建流程部署对象
+DeploymentBuilder，并通过DeploymentBuilder对象实现流程部署
+
+DeploymentBuilder对象
+--------------------------------
+DeploymentBuilder中定义了6种添加资源的方式
+
+ //添加输入流资源
+ DeploymentBuilder addInputStream(String resourceName, InputStream inputStream); 
+ //添加classpath下的文件资源
+ DeploymentBuilder addClasspathResource(String resource); 
+ //添加字符串资源
+ DeploymentBuilder addString(String resourceName, String text); 
+ //添加字节数组资源
+ DeploymentBuilder addBytes(String resourceName, byte[] bytes); 
+ //添加ZIP压缩包资源
+ DeploymentBuilder addZipInputStream(ZipInputStream zipInputStream); 
+ //添加BpmnModel模型资源
+ DeploymentBuilder addBpmnModel(String resourceName, BpmnModel bpmnModel); 
+ 
+ //设置部署名称
+ DeploymentBuilder name(String name); 
+ //设置部署分类
+ DeploymentBuilder category(String category); 
+ //设置部署key
+ DeploymentBuilder key(String key); 
+ //设置租户ID 
+ DeploymentBuilder tenantId(String tenantId); 
+ //设置部署属性
+ DeploymentBuilder deploymentProperty(String propertyKey, Object propertyValue); 
+ 
+ //执行部署
+ Deployment deploy();
+ 
+执行流程部署
+--------------------------------
+
+添加输入流资源 代码示例
+--------------------------------
+ //从文件系统读取资源文件，创建输入流
+ try (FileInputStream inputStream = new FileInputStream( 
+	new File("/Users/bpm/processes/HolidayRequest.bpmn20.xml"))) { 
+ 
+	 //创建DeploymentBuilder 
+	 DeploymentBuilder builder = repositoryService.createDeployment(); 
+	 
+	 //将输入流传递给DeploymentBuilder，同时指定资源名称
+	 builder.addInputStream("HolidayRequest.bpmn20.xml", inputStream);
+	 
+	 //执行部署
+	 builder.deploy(); 
+ }
+ 
+Classpath下的文件资源 代码示例
+--------------------------------
+调用DeploymentBuilder的addClasspathResource()方法可以直接加载类路径下的资源文件
+ //创建DeploymentBuilder 
+ DeploymentBuilder builder = repositoryService.createDeployment(); 
+ //加载classpath下的文件
+ builder.addClasspathResource("processes/HolidayRequest.bpmn20.xml");
+ //执行部署
+ builder.deploy();
+ 
+添加字符串资源 代码示例
+--------------------------------
+ //读取文件并转换为string 
+ try (FileReader fileReader = 
+ new FileReader(new File("/Users/bpm/processes/HolidayRequest.bpmn20.xml")); 
+	 BufferedReader bufferedReader = new BufferedReader(fileReader);) { 
+	 StringBuilder stringBuilder = new StringBuilder(); 
+	 String line; 
+	 while ((line = bufferedReader.readLine()) != null) { 
+		stringBuilder.append(line); 
+	 } 
+	 //创建DeploymentBuilder 
+	 DeploymentBuilder builder = repositoryService.createDeployment(); 
+	 //将输入流传递给DeploymentBuilder，同时指定资源名称
+	 builder.addString("HolidayRequest.bpmn20.xml", stringBuilder.toString());
+	 //执行部署
+	 builder.deploy(); 
+ }
+ 
+添加字节数组 代码示例
+--------------------------------
+//读取文件并转换为byte[] 
+ try (FileInputStream inputStream = 
+ new FileInputStream(new File("/Users/bpm/processes/HolidayRequest.bpmn20.xml")); 
+	 ByteArrayOutputStream bos = new ByteArrayOutputStream();) { 
+	 byte[] temp = new byte[1024]; 
+	 int n; 
+	 while ((n = inputStream.read(temp)) != -1) { 
+		bos.write(temp, 0, n); 
+	 } 
+	 
+	 //创建DeploymentBuilder 
+	 DeploymentBuilder builder = repositoryService.createDeployment();
+	 
+	 //将字节数组传递给DeploymentBuilder，同时指定资源名称
+	 builder.addBytes("HolidayRequest.bpmn20.xml", bos.toByteArray());
+	 
+	 //执行部署
+	 builder.deploy();
+	}
+	
+添加压缩包资源 代码示例
+--------------------------------
+//读取ZIP文件
+ try (FileInputStream inputStream = 
+ new FileInputStream(new File("/Users/bpm/processes/HolidayRequest.zip")); 
+	 ZipInputStream zipInputStream = new ZipInputStream(inputStream);) { 
+	 //创建DeploymentBuilder 
+	 DeploymentBuilder builder = repositoryService.createDeployment(); 
+	 //传递ZIP输入流给DeploymentBuilder 
+	 builder.addZipInputStream(zipInputStream);
+	 //执行部署
+	 builder.deploy(); 
+ }
+ 
