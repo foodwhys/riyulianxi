@@ -1103,3 +1103,224 @@ Classpath下的文件资源 代码示例
 	 builder.deploy(); 
  }
  
+添加BpmnModel模型资源
+--------------------------------
+ //创建BpmnModel对象
+ BpmnModel model = new BpmnModel(); 
+ 
+ //创建流程(Process) 
+ org.activiti.bpmn.model.Process process = new org.activiti.bpmn.model.Process(); 
+ model.addProcess(process); 
+ process.setId("HolidayRequest"); 
+ process.setName("请假申请流程"); 
+ 
+ //创建开始节点
+ StartEvent startEvent = new StartEvent(); 
+ startEvent.setId("startEvent1"); 
+ startEvent.setName("开始"); 
+ process.addFlowElement(startEvent);
+ 
+ //创建任务节点
+ UserTask userTask1 = new UserTask(); 
+ userTask1.setId("userTask1"); 
+ userTask1.setName("申请"); 
+ process.addFlowElement(userTask1);
+ 
+ //创建任务节点
+ UserTask userTask2 = new UserTask(); 
+ userTask2.setId("userTask2"); 
+ userTask2.setName("审批"); 
+ process.addFlowElement(userTask2); 
+ 
+ //创建结束节点
+ EndEvent endEvent = new EndEvent(); 
+ endEvent.setId("endEvent1"); 
+ endEvent.setName("结束"); 
+ process.addFlowElement(endEvent); 
+ 
+ //创建节点的关联关系
+ process.addFlowElement(new SequenceFlow("startEvent1", "userTask1")); 
+ process.addFlowElement(new SequenceFlow("userTask1", "userTask2")); 
+ process.addFlowElement(new SequenceFlow("userTask2", "endEvent1")); 
+ 
+ //创建DeploymentBuilder 
+ DeploymentBuilder builder = repositoryService.createDeployment(); 
+ 
+ //传递BpmnModel给DeploymentBuilder 
+ builder.addBpmnModel("HolidayRequest.bpmn20.xml", model);
+ 
+ //执行部署
+ builder.deploy();
+ 
+部署结果查询
+--------------------------------
+流程部署主要涉及3个表：
+部署记录表（ACT_RE_DEPLOYMENT，主要用于存储流程部署记录）
+流程定义表（ACT_RE_PROCDEF，主要用于存储流程定义信息）
+静态资源表（ACT_GE_BYTEARRAY，主要用于存储静态资源文件，如BPMN文件和流程缩略图）
+
+ id：部署ID，继承自父类AbstractEntityNoRevision的id属性，对应ACT_RE_DEPLOYMENT表的ID_字段（主键）。
+ name：部署名称，对应ACT_RE_DEPLOYMENT表的NAME_字段。
+ category：流程部署分类，对应ACT_RE_DEPLOYMENT表的CATEGORY_字段。
+ key：流程部署的key，对应ACT_RE_DEPLOYMENT表的KEY_字段。
+ tenantId：租户ID，对应ACT_RE_DEPLOYMENT表的TENANT_ID_字段。
+ resources：关联的资源文件。该属性是一个Map，前面介绍的DeploymentBuilder加载流程资源的方法
+ engineVersion：工作流引擎版本，主要用于解决工作流引擎向后兼容的问题，对应ACT_RE_DEPLOYMENT表ENGINE_VERSION_字段。
+ deploymentTime：部署时间，对应ACT_RE_DEPLOYMENT表DEPLOY_TIME_字段。
+
+DeploymentEntityManager
+--------------------------------
+DeploymentEntityManager接口继承自EntityManager接口，
+支持对ACT_RE_DEPLOYMENT表进行通用的增、删、改、查操作
+
+ //根据部署名称查找最新的部署记录
+ DeploymentEntity findLatestDeploymentByName(String deploymentName); 
+ 
+ //根据部署记录ID查询部署资源名称
+ List<String> getDeploymentResourceNames(String deploymentId);
+ 
+ //原生查询，返回分页记录
+ List<Deployment> findDeploymentsByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults);
+ 
+ //原生查询，返回记录数量
+ long findDeploymentCountByNativeQuery(Map<String, Object> parameterMap); 
+ 
+ //根据DeploymentQuery查询，返回分页记录
+ List<Deployment> findDeploymentsByQueryCriteria(DeploymentQueryImpl deploymentQuery, Page page); 
+ 
+ //根据DeploymentQuery查询，返回记录数量
+ long findDeploymentCountByQueryCriteria(DeploymentQueryImpl deploymentQuery);
+ 
+ //级联删除部署记录
+ void deleteDeployment(String deploymentId, boolean cascade);
+ 
+DeploymentQuery
+--------------------------------
+DeploymentQuery接口继承自Query接口，支持Query接口中的所有查询方法
+
+ //按排序条件升序排列
+ T asc(); 
+ //按排序条件降序排列
+ T desc(); 
+ //执行查询并返回结果集数量
+ long count(); 
+ //执行查询并返回唯一结果，没有找到返回null，结果数量大于1时报错
+ U singleResult(); 
+ //执行查询并返回结果集
+ List<U> list(); 
+ //执行分页查询并返回结果集
+ List<U> listPage(int firstResult, int maxResults);
+ 
+ProcessDefinitionEntity接口的实现类为ProcessDefinitionEntityImpl，该类对应ACT_RE_PROCDEF表。
+ProcessDefinitionEntityImpl类包含以下属性。
+
+
+ProcessDefinitionEntity
+--------------------------------
+ProcessDefinitionEntity接口的实现类为ProcessDefinitionEntityImpl，该类对应ACT_RE_PROCDEF表
+
+ id：流程定义ID，继承自AbstractEntity类的id属性，对应ACT_RE_PROCDEF表的ID_字段（主键）。
+ description：流程描述，对应ACT_RE_PROCDEF表的DESCRIPTION_字段。
+ key：流程的key，对应ACT_RE_PROCDEF表的KEY_字段。
+ version：流程的版本，对应ACT_RE_PROCDEF表的REV_字段，同一个key可以对应多个版本，不同版本之间流程定义的ID是不同的。
+ category：流程分类，对应ACT_RE_PROCDEF表的CATEGORY_字段。
+ deploymentId ：部署 ID ，对应 ACT_RE_PROCDEF 表 的 DEPLOYMENT_ID_字段，与 ACT_RE_ DEPLOYMENT表中的ID_字段关联。
+ resourceName：资源名称，对应ACT_RE_PROCDEF表的RESOURCE_NAME_字段。
+ tenantId：租户ID，对应ACT_RE_PROCDEF表的TENANT_ID_字段。
+ historyLevel：历史数据级别，在ACT_RE_PROCDEF表中没有对应字段，主要用于判断流程执行过程中是否需要保存历史数据。
+ diagramResourceName：图片资源名称，对应ACT_RE_PROCDEF表的DGRM_RESOURCE_NAME_字段。
+ variables：流程定义变量信息，类型为Map，在ACT_RE_PROCDEF表中没有对应字段。
+ isGraphicalNotationDefined：是否有图片信息，对应ACT_RE_PROCDEF表的HAS_GRAPHICAL_NOTATION_字段。
+ hasStartFormKey：是否存在发起表单，对应ACT_RE_PROCDEF表的HAS_START_FORM_KEY_字段。
+ suspensionState：挂起状态，对应ACT_RE_PROCDEF表的SUSPENSION_STATE_字段，已挂起的流程定义不能再发起和流转。
+ engineVersion：工作流引擎版本，主要用于解决工作流引擎向后兼容的问题，对应ACT_RE_PROCDEF表的ENGINE_VERSION_字段。
+ 
+ProcessDefinitionEntityManager
+--------------------------------
+ProcessDefinitionEntityManager接口继承自EntityManager接口，支持对ACT_RE_PROCDEF表进行通用的增、删、改、查操作。
+ 
+ //根据流程定义key查找最新的流程定义
+ ProcessDefinitionEntity findLatestProcessDefinitionByKey(String processDefinitionKey);
+ 
+ //根据流程定义key和租户ID查找最新的流程定义
+ ProcessDefinitionEntity findLatestProcessDefinitionByKeyAndTenantId(String processDefinitionKey, String tenantId); 
+ 
+ //根据ProcessDefinitionQuery条件查询，返回分页记录
+ List<ProcessDefinition> 
+ findProcessDefinitionsByQueryCriteria(ProcessDefinitionQueryImpl processDefinitionQuery, Page page); 
+ 
+ //根据ProcessDefinitionQuery条件查询，返回记录数量
+ long findProcessDefinitionCountByQueryCriteria(ProcessDefinitionQueryImpl processDefinitionQuery); 
+ 
+ //根据部署ID和流程定义key查找
+ ProcessDefinitionEntity findProcessDefinitionByDeploymentAndKey(String deploymentId, String processDefinitionKey); 
+ 
+ //根据部署ID、流程定义key和租户ID查找
+ ProcessDefinitionEntity findProcessDefinitionByDeploymentAndKeyAndTenantId(String deploymentId, String processDefinitionKey, String tenantId); 
+
+ //根据流程定义key、流程定义版本和租户ID查找
+ ProcessDefinition findProcessDefinitionByKeyAndVersionAndTenantId(String processDefinitionKey, Integer processDefinitionVersion, String tenantId); 
+ 
+ //原生查询，返回分页记录
+ List<ProcessDefinition> findProcessDefinitionsByNativeQuery(Map<String, Object> parameterMap, int firstResult, int maxResults); 
+
+ //原生查询，返回记录数量
+ long findProcessDefinitionCountByNativeQuery(Map<String, Object> parameterMap); 
+
+ //根据部署ID更新相应流程定义的租户ID 
+ void updateProcessDefinitionTenantIdForDeployment(String deploymentId, String newTenantId); 
+
+ //根据部署ID删除流程定义
+ void deleteProcessDefinitionsByDeploymentId(String deploymentId);
+ 
+ProcessDefinitionQuery
+--------------------------------
+该接口提供了多种查询方法，实现了根据流程定义ID查询、根据流程定义key查询、根据流程名称查询等操作
+
+查询方法 说明
+processDefinitionId(String processDefinitionId) 通过指定的流程定义ID查询
+processDefinitionIds(Set<String> processDefinitionIds) 根据一组流程定义ID批量查询
+processDefinitionCategory (String processDefinitionCategory) 根据流程分类查询
+processDefinitionCategoryLike (String processDefinitionCategoryLike) 根据流程分类模糊查询
+processDefinitionCategoryNotEquals (String categoryNotEquals) 查询排除某个分类后的流程定义
+processDefinitionName(String processDefinitionName) 根据流程定义名称查询
+processDefinitionNameLike (String processDefinitionNameLike) 根据流程定义名称模糊查询
+
+Activiti流程定义查询API支持的排序方法
+--------------------------------
+orderByProcessDefinitionCategory() 按流程分类排序，还需要指定升序或降序排列
+orderByProcessDefinitionKey() 按流程定义key排序，还需要指定升序或降序排列
+orderByProcessDefinitionId() 按流程定义ID排序，还需要指定升序或降序排列
+orderByProcessDefinitionVersion() 按流程版本号排序，还需要指定升序或降序排列
+orderByProcessDefinitionName() 按流程定义名称排序，还需要指定升序或降序排列
+orderByDeploymentId() 按部署ID排序，还需要指定升序或降序排列
+orderByTenantId() 按租户ID排序，还需要指定升序或降序排列
+
+--------------------------------
+queryProcessDefinitionByTenantId(String tenantId) { 
+ return repositoryService.createProcessDefinitionQuery() 
+ //指定流程定义key 
+ .processDefinitionTenantId(tenantId) 
+ //按流程key排序
+ .orderByProcessDefinitionKey() 
+ //升序
+ .asc() 
+ //返回全部记录
+ .list(); 
+}
+
+流程资源查询
+--------------------------------
+流程资源存储在ACT_GE_BYTEARRAY表中，Activiti中的实体类ResourceEntity与该资源表相对应
+
+ResourceEntity
+--------------------------------
+ACT_GE_BYTEARRAY表是一个公共表，用于存储所有静态资源信息，
+包括流程部署资源文件，如流程的BPMN文件、流程缩略图、表单模型、规则文件等。
+
+ id：资源ID，继承自AbstractEntityNoRevision类，对应ACT_GE_BYTEARRAY表的ID_字段（主键）。
+ name：资源名称，对应ACT_GE_BYTEARRAY表的NAME_字段。
+ bytes：资源内容，以二进制形式保存，对应ACT_GE_BYTEARRAY表的BYTES_字段。
+ deploymentId：部署ID，对应ACT_GE_BYTEARRAY表的DEPLOYMENT_ID_字段，与ACT_RE_DEPLOYMENT表中的ID_字段相关联。
+ generated：标识对应的资源是否是由系统生成，对应ACT_GE_BYTEARRAY表的GENERATED_字段。
+ 
