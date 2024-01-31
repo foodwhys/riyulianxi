@@ -1324,3 +1324,121 @@ ACT_GE_BYTEARRAY表是一个公共表，用于存储所有静态资源信息，
  deploymentId：部署ID，对应ACT_GE_BYTEARRAY表的DEPLOYMENT_ID_字段，与ACT_RE_DEPLOYMENT表中的ID_字段相关联。
  generated：标识对应的资源是否是由系统生成，对应ACT_GE_BYTEARRAY表的GENERATED_字段。
  
+ResourceEntityManager
+--------------------------------
+ResourceEntityManager接口继承自EntityManager接口，
+支持对ACT_GE_BYTEARRAY表进行通用的增、删、改、查操作
+
+ //根据部署ID查询资源列表
+ List<ResourceEntity> findResourcesByDeploymentId(String deploymentId); 
+ 
+ //根据部署ID和资源名称查询资源
+ ResourceEntity findResourceByDeploymentIdAndResourceName( String deploymentId, String resourceName); 
+ 
+ //根据部署ID删除资源
+ void deleteResourcesByDeploymentId(String deploymentId);
+ 
+getResources() { 
+ if (resources == null && id != null) { 
+ List<ResourceEntity> resourcesList = Context.getCommandContext(). 
+ getResourceEntityManager().findResourcesByDeploymentId(id);
+ resources = new HashMap<String, ResourceEntity>(); 
+ for (ResourceEntity resource : resourcesList) {
+	 resources.put(resource.getName(), resource); 
+ } 
+}
+
+流程部署完整示例
+--------------------------------
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ 
+ //部署流程
+ Deployment deployment = repositoryService.createDeployment() 
+ 
+ //设置部署基本属性
+ .key("HolidayRequest") 
+ .name("请假申请") 
+ .category("HR") 
+ .tenantId("HR") 
+ //添加classpath下的流程定义资源
+ .addClasspathResource("processes/HolidayRequest.bpmn20.xml") 
+ //执行部署
+ .deploy(); 
+ 
+ log.info("部署记录：deployment_id={}, deployment_name={}", 
+ deployment.getId(), deployment.getName()); 
+ 
+ //查询流程资源
+ log.info("部署资源:"); 
+ if (deployment instanceof DeploymentEntity) { 
+	 DeploymentEntity entity = (DeploymentEntity) deployment; 
+	 Map<String, ResourceEntity> resourceEntityMap = entity.getResources(); 
+	 for (Map.Entry<String, ResourceEntity> resourceEntity : 
+		 resourceEntityMap.entrySet()) { 
+		 ResourceEntity entityValue = resourceEntity.getValue(); 
+		 log.info(" 
+		 resource_name={}, 
+		 deployment_id={}", 
+		 entityValue.getName(), 
+		 entityValue.getDeploymentId()); 
+	 } 
+ } 
+ //查询流程定义
+ ProcessDefinition processDefinition = repositoryService.createProcessDefinitionQuery() 
+ //指定流程定义key
+ .processDefinitionKey("HolidayRequest") 
+ //指定激活状态
+ .active() 
+ //查找最新版本
+ .latestVersion() 
+ //返回单个记录
+ .singleResult(); 
+ log.info("流程定义:processDefinition_id={}, 
+ processDefinition_key={}",processDefinition.getId(),processDefinition.getName()); 
+ //关闭工作流引擎
+ closeEngine();
+ 
+相关表的变更
+--------------------------------
+Activiti都会向部署记录表（ACT_RE_DEPLOYMENT）、流程定义表（ACT_RE_PROCDEF）和静态资源表（ACT_GE_BYTEARRAY）中插入相应的记录。
+其中，ACT_RE_DEPLOYMENT为主表，ACT_RE_PROCDEF和ACT_GE_BYTEARRAY通过DEPLOYMENT_ID_字段与ACT_RE_DEPLOYMENT的主键ID_字段关联
+
+
+--------------------------------
+第十一章 开始事件与结束事件
+--------------------------------
+
+事件概述
+--------------------------------
+在BPMN 2.0中，事件用圆圈符号表示。
+按照特性分类，可以将其分为两大类。
+捕获（catching）事件
+抛出（throwing）事件
+
+捕获事件：当流程执行到该事件时，它会中断执行，等待被触发。其触发类型由XML定义文件中的类型声明决定。
+
+抛出事件：当流程执行到该事件时，会抛出一个结果。抛出的类型由XML定义文件中的类型声明决定。
+
+捕获事件的内部图标填充为白色
+抛出事件的内部图标填充为黑色
+
+总的来说，BPMN 2.0支持60多种不同类型的事件
+
+主要有三大类型事件：开始事件、中间事件（包括中间事件和边界事件）和结束事件。
+
+ 定时器事件定义（timer event definition）
+ 信号事件定义（signal event definition）
+ 错误事件定义（error event definition）
+ 消息事件定义（message event definition）
+ 取消事件定义（cancel event definition）
+ 补偿事件定义（compensate event definition）
+ 终止事件定义（terminate event definition）
+ 
+ 
+--------------------------------
+边界事件与中间事件
+--------------------------------
+边界事件是依附在活动上的“捕获型”事件，会一直监听所有进行时活动的某种事件的触发，
+然后沿边界事件的外出顺序流继续流转，如果是中断事件会终止所依附的活动。
+中间事件提供的特殊功能可以用于处理流程执行过程中抛出、捕获的事件
