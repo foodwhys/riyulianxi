@@ -1469,6 +1469,12 @@ Activiti都会向部署记录表（ACT_RE_DEPLOYMENT）、流程定义表（ACT_
 
 用户任务 代码示例
 --------------------------------
+getStringDate(Date time) { 
+ SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+ String dateString = formatter.format(time); 
+ return dateString; 
+}
+
  //加载Activiti配置文件并初始化工作流引擎及服务
  loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
  //部署流程
@@ -1507,3 +1513,122 @@ Activiti都会向部署记录表（ACT_RE_DEPLOYMENT）、流程定义表（ACT_
  
  //关闭工作流引擎
  closeEngine();
+ 
+用户任务分配给办理人
+--------------------------------
+用户任务可以直接分配给一个用户，
+这个任务只能出现在该用户的个人任务列表中，
+而不会出现在其他人的任务列表中。
+
+Activiti将用户任务分配给办理人的方式主要有以下两种：
+ 通过humanPerformer元素定义；
+ 通过assignee属性定义。
+
+用户任务分配给候选人（组）
+--------------------------------
+ 通过potentialOwner元素定义
+ 通过candidateUsers/candidateGroups属性定义
+
+动态分配任务
+--------------------------------
+两种动态分配任务的方法
+
+1.通过UEL表达式实现动态分配任务
+--------------------------------
+（1）值表达式
+//使用流程变量
+${userName} 
+//使用spring-bean的属性
+${userBean.userName}
+
+（2）方法表达式
+//调用不带参数的方法
+${taskAssigneeBean.getMangerOfProcessInitiator()} 
+//调用带有参数的方法
+${taskAssigneeBean.getMangerOfDeptId("EP", execution)}
+
+
+
+ execution：当前正在运行的执行实例的DelegateExecution对象。
+ task：当前正在操作的任务实例的DelegateTask对象，仅在任务监听器求值表达式中有效。
+ authenticatedUserId：当前已认证的用户的唯一标识，如果没有用户通过身份验证，则该变量不可用。
+ 
+2．通过任务监听器实现动态分配任务
+--------------------------------
+Activiti提供了任务监听器，允许在任务执行过程中执行特定的Java程序或者表达式。
+ <userTask id="userTask4" name="指定人审批">
+	 <extensionElements>
+	 <activiti:taskListener event="create" 
+	 class="com.bpm.example.usertask.demo3.listener.UserTaskListener"/>
+	 </extensionElements>
+ </userTask>
+
+public class UserTaskListener implements TaskListener {
+@Override 
+ public void notify(DelegateTask delegateTask) { 
+ switch (delegateTask.getTaskDefinitionKey()){
+........
+case "userTask4": 
+ //为用户任务userTask4设置办理人
+ String designatedUserName 
+ = (String)delegateTask.getVariable("designatedUserName"); 
+ delegateTask.setAssignee(designatedUserName); 
+ break;
+	}
+ }
+}
+
+ //设置流程变量
+ Map variables = new HashMap();
+ 
+ variables.put("designatedUserName", "wangjunlin");
+ //发起流程
+ ProcessInstance processInstance = 
+ runtimeService.startProcessInstanceById(processDefinition.getId(), variables);
+ 
+ 
+接收任务
+--------------------------------
+接收任务和手动任务类似，不同之处在于手动任务会直接通过，而接收任务则会停下来等待触发，只有
+被触发才会继续流转。
+
+runtimeService.trigger()系列方法
+--------------------------------
+trigger(String executionId) 触发指定的执行流
+trigger(String executionId, Map<String, Object> processVariables) 触发指定的执行流，同时传递流程变量
+trigger(String executionId, Map<String, Object> processVariables, Map<String, Object> transientVariables) 触发指定的执行流，同时传递流程变量和瞬时变量
+
+<!-- 定义接收任务 -->
+ <receiveTask id="receiveTask1" name="等待激活结果">
+	 <documentation>这是接收任务，等待触发后流程离开继续往下执行</documentation>
+	 <extensionElements>
+		 <activiti:executionListener event="end" 
+			class="com.bpm.example.receivetask.demo.listener.ReceiveTaskExecutionListener"/> 
+	 </extensionElements>
+ </receiveTask>
+ 
+public class ReceiveTaskExecutionListener implements ExecutionListener { 
+ 
+ @Override 
+ public void notify(DelegateExecution execution) { 
+	 FlowElement currentFlowElement = execution.getCurrentFlowElement(); 
+	 log.info("
+	 当前为接收任务，节点名称：{}，
+	 备注：{}", 
+	 currentFlowElement.getName(), 
+	 currentFlowElement.getDocumentation()); 
+	 
+	 String result = (String)execution.getVariable("result"); 
+	 log.info("接收任务已被触发，处理结果为：{}", result); 
+ } 
+}
+
+//设置流程变量
+ Map variables = new HashMap<>();
+ variables.put("result", "账号成功激活！");
+ //触发流程离开接收任务继续向下执行
+ runtimeService.trigger(execution.getId(), variables);
+ 
+ 
+服务任务、脚本任务和业务规则任务
+--------------------------------
