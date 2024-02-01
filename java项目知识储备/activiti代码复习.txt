@@ -1442,3 +1442,68 @@ Activiti都会向部署记录表（ACT_RE_DEPLOYMENT）、流程定义表（ACT_
 边界事件是依附在活动上的“捕获型”事件，会一直监听所有进行时活动的某种事件的触发，
 然后沿边界事件的外出顺序流继续流转，如果是中断事件会终止所依附的活动。
 中间事件提供的特殊功能可以用于处理流程执行过程中抛出、捕获的事件
+
+--------------------------------
+第十三章 用户任务、手动任务和接收任务
+--------------------------------
+1.用户任务指需要人工参与完成的工作
+2.手动任务指会自动执行的一种任务
+3.接收任务指会使流程处于等待状态、需要触发的任务
+
+用户任务
+--------------------------------
+用户任务是常见的一类任务，指业务流程中需要人工参与完成的工作。
+
+ 分配到一个用户（私有任务）；
+ 共享给多个用户（共享任务）。
+ 
+ 在大部分的流程场景中，一个用户任务通常被具体指派给一个人进行处理，
+ 通过这种方式指派的人在Activiti中称为办理人
+ 
+ 而在某些业务处理场景中，一个任务可以被共享给多人，
+ 这类任务在工作流引擎中只创建一个任务实例，
+ 它会出现在所有候选人和候选组成员的待办中，
+ 这些人都有权认领（claim）并完成该任务
+ 
+提示：一个用户任务只允许分配一个办理人，但可以分配多个候选人（组）。
+
+用户任务 代码示例
+--------------------------------
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //部署流程
+ ProcessDefinition processDefinition = 
+ deployByClasspathResource("processes/UserTaskProcess.bpmn20.xml"); 
+ 
+ //启动流程
+ ProcessInstance processInstance =
+ runtimeService.startProcessInstanceById(processDefinition.getId()); 
+ //查询第一个任务
+ Task firstTask = 
+ taskService.createTaskQuery().processInstanceId(processInstance. 
+ getProcessInstanceId()).singleResult(); 
+ 
+ log.info("第一个任务taskId：{}，taskName为：{}", firstTask.getId(), firstTask.getName()); 
+ log.info("用户任务描述信息为：{}", firstTask.getDescription()); 
+ log.info("用户任务创建时间为：{}", getStringDate(firstTask.getCreateTime())); 
+ 
+ //设置流程变量
+ Map variables = new HashMap<>(); 
+ variables.put("dayNum", 3); 
+ variables.put("applyReason", "休探亲假。"); 
+ 
+ //办理第一个任务
+ taskService.complete(firstTask.getId(), variables); 
+ 
+ //查询第二个任务
+ Task secondTask = 
+ taskService.createTaskQuery().processInstanceId(processInstance. 
+ getProcessInstanceId()).singleResult(); 
+ 
+ log.info("第二个任务taskId：{}，taskName为：{}", secondTask.getId(), secondTask.getName()); 
+ log.info("用户任务描述信息为：{}", secondTask.getDescription()); 
+ log.info("用户任务创建时间为：{}，过期时间为：{}", 
+ getStringDate(secondTask.getCreateTime()), getStringDate(secondTask.getDueDate())); 
+ 
+ //关闭工作流引擎
+ closeEngine();
