@@ -1632,3 +1632,182 @@ public class ReceiveTaskExecutionListener implements ExecutionListener {
  
 服务任务、脚本任务和业务规则任务
 --------------------------------
+服务任务（service task）
+脚本任务（script task）
+业务规则任务（business rule task）
+
+服务任务、脚本任务和业务规则任务都是无须人工参与的自动化任务
+服务任务可自动执行一段Java程序
+脚本任务可用于执行一段脚本代码
+业务规则任务可用于执行一条或多条规则
+
+
+服务任务（service task）
+--------------------------------
+（1）通过activiti:class属性指定一个Java类
+若指定为实现JavaDelegate接口的Java类，则示例代码如下：
+<serviceTask id="serviceTask1" 
+ name="服务任务" 
+ activiti:class="com.bpm.example.servicetask.demo1.delegate.MyJavaDelegate" />
+ 
+public class MyJavaDelegate implements JavaDelegate { 
+ 
+ @Override 
+ public void execute(DelegateExecution execution) { 
+ //在这里编写服务任务调用逻辑
+ } 
+}
+
+若指定为实现ActivityBehavior接口的Java类，则示例代码如下：
+<serviceTask id="serviceTask2" 
+ name="服务任务" 
+ activiti:class="com.bpm.example.servicetask.demo1.behavior.MyActivityBehavior" />
+ 
+public class MyActivityBehavior implements ActivityBehavior { 
+ 
+ @Override 
+ public void execute(DelegateExecution execution) { 
+ //在这里编写服务任务调用逻辑
+ } 
+}
+
+服务任务通过activiti:class属性指定的Java类只会创建一个实例，
+即只有当流程初次流转到调用该Java类的服务任务时，
+才会实例化一个对象，该对象会被复用。
+
+所有的流程实例都会共享相同的类实例，并调用其execute()
+方法。这就意味着，如果该Java类中使用了成员变量，必须保证线程安全
+
+
+（2）通过activiti:delegateExpression使用委托表达式指定
+<serviceTask id="serviceTask3" 
+ name="服务任务" 
+ activiti:delegateExpression="${delegateExpressionBean}" />
+ 
+activiti:delegateExpression属性指定委托表达式为${delegateExpressionBean}。
+其中，delegateExpressionBean是一个实现JavaDelegate接口的Bean，在表达式调
+用之前需要初始化到流程变量中，或者注册在Spring容器中。
+
+（3）通过activiti:expression属性使用UEL表达式指定
+
+
+用之前需要初始化到流程变量中，或者注册在Spring容器中。
+--------------------------------
+调用一个普通Java Bean的法或属性，在表达式调用之前需要将其初始化到流程变量中，或者注册在Spring容器中
+activiti:expression属性指定的表达式调用的Bean不需要实现JavaDelegate接口
+
+若指定为UEL方法表达式，则示例代码如下：
+<serviceTask id="serviceTask4" 
+ name="服务任务" 
+ activiti:expression="${businessBean.calculateMount1()}" />
+在以上服务任务定义中，加粗部分的代码通过activiti:expression属性指定UEL表达式为${businessBean. 
+calculateMount1()}，表示服务任务调用businessBean对象的calculateMount1（无参数）方法
+
+通过UEL方法表达式也可以指定为带参数的表达式，示例代码如下：
+<serviceTask id="serviceTask5" 
+ name="服务任务" 
+ activiti:expression="${businessBean.calculateMount2(execution, money)}" />
+ 
+在以上服务任务定义中，加粗部分的代码通过activiti:expression属性指定UEL表达式为${businessBean. 
+calculateMount2(execution, money)}
+
+若指定为UEL值表达式，则示例代码如下
+<serviceTask id="serviceTask6" 
+ name="服务任务" 
+ activiti:expression="${businessBean.total}" />
+ 
+以上几种通过activiti:expression属性指定的UEL表达式中都使用了businessBean，其内容如下：
+public class BusinessBean implements Serializable { 
+ @Setter 
+ @Getter 
+ private float total; 
+ 
+ /** 
+ * 无参表达式
+ */ 
+ public void calculateMount1() { 
+ //此处省略方法逻辑代码
+ } 
+ 
+ /** 
+ * 带参数的表达式
+ * @param execution DelegateExecution对象
+ * @param money 名称为money的流程变量
+ */ 
+ public void calculateMount2(DelegateExecution execution, float money) { 
+ //此处省略方法逻辑代码
+ } 
+}
+
+服务任务的属性注入
+--------------------------------
+通过activiti:class指定实现JavaDelegate接口的类
+通过activiti:delegateExpression指定委托表达式
+
+Activiti支持如下类型的注入
+ 固定字符串。对于某些常量，可以直接在流程定义中配置字符串注入。
+ 表达式。对于某些变量或者对象，可以将其配置为UEL表达式注入。
+
+<serviceTask id="serviceTask1" name="计算总价服务任务" 
+ activiti:class="com.bpm.example.servicetask.demo1.delegate. 
+ CalculationStringFieldInjectedJavaDelegate">
+	 <extensionElements>
+		 <activiti:field name="unitPrice" stringValue="100.00" />
+		 <activiti:field name="quantity" stringValue="10" />
+		 <activiti:field name="description">
+		 <activiti:string>这是一段比较长的描述信息</activiti:string>
+		 </activiti:field>
+	 </extensionElements>
+ </serviceTask>
+ 
+@Slf4j 
+public class CalculationStringFieldInjectedJavaDelegate implements JavaDelegate { 
+ @Setter
+ private Expression unitPrice;
+ @Setter
+ private Expression quantity;
+ @Setter
+ private Expression description;
+ 
+ public void execute(DelegateExecution execution) { 
+	 //读取注入的unitPrice字段值
+	 double unitPriceNum = Double.valueOf((String) unitPrice.getValue(execution)); 
+	 //读取注入的quantity字段值
+	 int quantityNum = Integer.valueOf((String) quantity.getValue(execution)); 
+	 //读取注入的description字段值
+	 String descriptionStr = (String) description.getValue(execution); 
+	 double totalAmount = unitPriceNum * quantityNum; 
+	 log.info("单价：{}，数量：{}，总价：{}", unitPriceNum, quantityNum, totalAmount); 
+	 log.info("描述信息：{}", descriptionStr); 
+	 //将totalAmount放入流程变量中
+	 execution.setVariable("totalAmount", totalAmount); 
+ } 
+}
+这些属性都提供了setter()方法（这里使用Lombok的@Setter注解实现）
+
+@Slf4j 
+public class RunServiceTaskStringFieldInjectedProcessDemo extends ActivitiEngineUtil { 
+ 
+ @Test 
+ public void runServiceTaskStringFieldInjectedProcessDemo() { 
+ //加载Activiti配置文件并初始化工作流引擎及服务
+ loadActivitiConfigAndInitEngine("activiti.cfg.xml"); 
+ //部署流程
+ ProcessDefinition processDefinition = 
+ deployByClasspathResource("processes/ServiceTaskStringFieldInjectedProcess.bpmn20.xml"); 
+ 
+ //发起流程
+ ProcessInstance processInstance = 
+ runtimeService.startProcessInstanceById(processDefinition.getId()); 
+ //查询历史流程变量
+ HistoricVariableInstance historicVariableInstance = 
+ historyService.createHistoricVariableInstanceQuery() 
+ .processInstanceId(processInstance.getId()) 
+ .variableName("totalAmount")
+ .singleResult(); 
+ log.info("totalAmount的值为：{}", historicVariableInstance.getValue()); 
+ 
+ //关闭工作流引擎
+ closeEngine(); 
+ } 
+}
