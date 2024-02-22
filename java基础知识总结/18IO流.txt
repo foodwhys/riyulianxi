@@ -1,0 +1,82 @@
+流的操作只有两种
+------------------------
+读和写
+
+字节流
+------------------------
+InputStream 
+OutputStream
+
+字符流
+------------------------
+Reader 
+Writer
+
+创建文件 
+------------------------
+FileWriter fw = new FileWriter("demo.txt"); // FileNotFoundException
+fw.write("abcde");
+fw.flush(); // 刷新缓冲区，将缓冲区中的数据刷到目的地文件中。
+fw.close(); // 关闭流，其实关闭的就是 java 调用的系统底层资源。在关闭前，会先刷新该流。
+
+
+FileWriter 写入数据的细节
+------------------------
+1：window 中的换行符：\r\n 两个符号组成。 linux：\n。
+2：续写数据，只要在构造函数中传入新的参数 true。
+3：目录分割符：window \\  linux：/
+
+public static void main(String[] args) {
+	FileWriter fw = null;
+	try {
+	
+		fw = new FileWriter("demo.txt",true);
+		fw.write("abcde");
+		
+	}catch (IOException e ){
+	
+		System.out.println(e.toString()+"....");
+		
+	}finally{
+	
+		if(fw!=null)
+		try{
+			fw.close();
+			
+		}catch (IOException e){
+		
+			System.out.println("close:"+e.toString());
+			
+		}
+	}
+}
+
+FileReader
+------------------------
+使用 Reader 体系，读取一个文本文件中的数据。返回 -1 ，标志读到结尾。
+
+/*
+创建可以读取文本文件的流对象，FileReader 让创建好的流对象和指定的文件相关联。
+*/
+
+FileReader fr = new FileReader("demo.txt");
+int ch = 0;
+while((ch = fr.read())!= -1) { //条件是没有读到结尾
+	System.out.println((char)ch); //调用读取流的 read 方法，读取一个字符。
+}
+fr.close();
+
+读取数据的第二种方式：第二种方式较为高效，自定义缓冲区
+
+FileReader fr = new FileReader("demo.txt"); //创建读取流对象和指定文件关联。
+//因为要使用 read(char[])方法，将读取到字符存入数组。所以要创建一个字符数组，一般数组的长度
+都是 1024 的整数倍。
+char[] buf = new char[1024];
+int len = 0;
+while(( len=fr.read(buf)) != -1) {
+	System.out.println(new String(buf,0,len));
+}
+fr.close();
+
+字符流
+------------------------
