@@ -1,0 +1,2 @@
+npm install 安装应用
+npm run dev 运行项目
