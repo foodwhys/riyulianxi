@@ -17,3 +17,5 @@
 	// 3.触发自定义事件，并传递参数
 	emit('get-message','this is son msg')
   }
+7.pinia 定义 defineStore
+
