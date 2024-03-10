@@ -1,0 +1,19 @@
+1.<script setup>语法糖
+2.reactive和ref函数
+3.computed
+4.watch
+参数：
+  immediate
+  deep
+5.常用周期函数 onMounted
+6.父子通信
+  父传子
+  defineProps 接收
+  子传父
+  @绑定事件
+  emit 方法触发事件
+  const emit = defineEmits(['get-message'])
+  const sendMsg = () =>{
+	// 3.触发自定义事件，并传递参数
+	emit('get-message','this is son msg')
+  }

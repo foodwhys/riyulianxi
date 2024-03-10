@@ -1,0 +1,180 @@
+// 导入
+import {ref, computed } from 'vue'
+
+<script setup>语法糖
+------------------------------------
+script标签添加 setup标记，不需要再写导出语句，默认会添加导出语句
+<script setup>
+  const message = 'this is message'
+  const logMessage = ()=>{
+    console.log(message)
+  }
+</script>
+
+------------------------------------
+reactive和ref函数
+------------------------------------
+1. 都是用来生成响应式数据
+2. 不同点
+   1. reactive不能处理简单类型的数据
+   2. ref参数类型支持更好，但是必须通过.value做访问修改
+   3. ref函数内部的实现依赖于reactive函数
+3. 在实际工作中的推荐
+   1. 推荐使用ref函数，减少记忆负担，小兔鲜项目都使用ref
+   
+omputed
+------------------------------------
+计算属性基本思想和Vue2保持一致，组合式API下的计算属性只是修改了API写法
+
+watch
+------------------------------------
+侦听一个或者多个数据的变化，数据变化时执行回调函数，俩个额外参数 immediate控制立刻执行，deep开启深度侦听
+// 1. 导入watch
+import { ref, watch } from 'vue'
+watch(count, (newValue, oldValue)=>{
+	console.log(`count发生了变化，老值为${oldValue},新值为${newValue}`)
+})
+
+3. immediate
+------------------------------------
+在侦听器创建时立即出发回调，响应式数据变化之后继续执行回调
+  // 2. 调用watch 侦听变化
+  watch(count, (newValue, oldValue)=>{
+    console.log(`count发生了变化，老值为${oldValue},新值为${newValue}`)
+  },{
+    immediate: true
+  })
+
+4. deep
+------------------------------------
+通过watch监听的ref对象默认是浅层侦听的，直接修改嵌套的对象属性不会触发回调执行，需要开启deep
+  // 2. 监听对象state 并开启deep
+  watch(state, ()=>{
+    console.log('数据变化了')
+  },{deep:true})
+  
+------------------------------------
+组合式API 
+------------------------------------
+1. 导入生命周期函数
+import { onMounted } from 'vue'
+
+2. 执行生命周期函数，传入回调
+onMounted(()=>{
+  // 自定义逻辑
+})
+
+生命周期函数执行多次的时候，会按照顺序依次执行
+onMounted(()=>{
+  // 自定义逻辑
+})
+
+onMounted(()=>{
+  // 自定义逻辑
+})
+
+父子通信
+------------------------------------
+基本思想
+1. 父组件中给子组件绑定属性
+2. 子组件内部通过props选项接收数据
+
+父组件
+// 引入子组件
+import sonComVue from './son-com.vue'
+<!-- 1.绑定属性 message -->
+<sonComVue message="this is app message">
+
+子组件
+const props = defineProps({
+	message:String
+})
+
+
+子传父
+------------------------------------
+基本思想
+ 1. 父组件中给子组件标签通过@绑定事件
+ 2. 子组件内部通过 emit 方法触发事件
+ 
+父组件
+<scirpt setup>
+// 引入子组件
+import sonComVue from './son-com.vue'
+const getMessage = (msg) =>{
+	console.log(msg)
+}
+</script>
+
+<template>
+<!-- 1.绑定自定义事件 -->
+	<sonComVue @get-message="getMessage" />
+</template>
+
+子组件
+<scirpt setup>
+// 2.通过defineProps "编译器宏" 接收子组件传递的数据
+const emit = defineEmits(['get-message'])
+
+const sendMsg = () =>{
+	// 3.触发自定义事件，并传递参数
+	emit('get-message','this is son msg')
+}
+</script>
+
+<template>
+<button @click="sendMsg">sendMsg</button>
+</template>
+
+
+------------------------------------
+ 模版引用
+------------------------------------
+
+
+1. 基本使用
+------------------------------------
+概念：通过 ref标识 获取真实的 dom对象或者组件实例对象
+实现步骤：
+1. 调用ref函数生成一个ref对象
+2. 通过ref标识绑定ref对象到标签
+
+<scirpt setup>
+import {ref} from 'vue'
+// 1.调用ref函数得到ref对象
+const h1Ref = ref(null)
+</script>
+
+<template>
+	<!-- 2.通过ref表示绑定ref对象 -->
+	<h1 ref= "h1Ref">我是dom标签对象h1</h1>
+</template>
+
+
+2. defineExpose
+------------------------------------
+默认情况下在 <script setup>语法糖下组件内部的属性和方法是不开放给父组件访问的，
+可以通过defineExpose编译宏指定哪些属性和方法容许访问
+说明：指定testMessage属性可以被访问到
+
+<scirpt setup>
+import {ref} from 'vue'
+// 1.调用ref函数得到ref对象
+const testMessage = ref('this is test msg')
+defineExpose({
+	testMessage
+})
+</script>
+
+
+------------------------------------
+provide和inject
+------------------------------------
+顶层组件向任意的底层组件传递数据和方法
+实现跨层组件通信
+
+顶层组件
+provide('key',顶层组件中的数据)
+
+底层组件
+const message = inject('key')
