@@ -1,3 +1,9 @@
+基础
+1.v-bind 为HTML标签绑定属性值href , css样式等  简写 :
+2.v-model 在表单元素上创建双向数据绑定
+3.v-on 为HTML标签绑定事件 简写 @
+
+-------------------------
 1.<script setup>语法糖
 2.reactive和ref函数
 3.computed
