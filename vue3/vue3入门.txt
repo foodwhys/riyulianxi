@@ -1,0 +1,369 @@
+1. setup选项的写法和执行时机
+------------------------------------
+setup在beforeCreate钩子之前执行
+<script>
+  export default {
+    setup(){
+      
+    },
+    beforeCreate(){
+      
+    }
+  }
+</script>
+
+2. setup中写代码的特点
+------------------------------------
+在setup函数中写的数据和方法需要在末尾以对象的方式return，才能给模版使用
+<script>
+  export default {
+    setup(){
+      const message = 'this is message'
+      const logMessage = ()=>{
+        console.log(message)
+      }
+      // 必须return才可以
+      return {
+        message,
+        logMessage
+      }
+    }
+  }
+</script>
+
+3. <script setup>语法糖
+------------------------------------
+script标签添加 setup标记，不需要再写导出语句，默认会添加导出语句
+<script setup>
+  const message = 'this is message'
+  const logMessage = ()=>{
+    console.log(message)
+  }
+</script>
+
+------------------------------------
+组合式API - reactive和ref函数
+------------------------------------
+
+1. reactive
+------------------------------------
+接受对象类型数据的参数传入并返回一个响应式的对象
+<script setup>
+ // 导入
+ import { reactive } from 'vue'
+ // 执行函数 传入参数 变量接收
+ const state = reactive({
+   msg:'this is msg'
+ })
+ const setSate = ()=>{
+   // 修改数据更新视图
+   state.msg = 'this is new msg'
+ }
+</script>
+
+<template>
+  {{ state.msg }}
+  <button @click="setState">change msg</button>
+</template>
+
+2. ref
+------------------------------------
+接收简单类型或者对象类型的数据传入并返回一个响应式的对象
+<script setup>
+ // 导入
+ import { ref } from 'vue'
+ // 执行函数 传入参数 变量接收
+ const count = ref(0)
+ const setCount = ()=>{
+   // 修改数据更新视图必须加上.value
+   count.value++
+ }
+</script>
+
+<template>
+  <button @click="setCount">{{count}}</button>
+</template>
+
+3. reactive 对比 ref
+------------------------------------
+1. 都是用来生成响应式数据
+2. 不同点
+   1. reactive不能处理简单类型的数据
+   2. ref参数类型支持更好，但是必须通过.value做访问修改
+   3. ref函数内部的实现依赖于reactive函数
+3. 在实际工作中的推荐
+   1. 推荐使用ref函数，减少记忆负担，小兔鲜项目都使用ref
+
+------------------------------------
+组合式API   
+------------------------------------
+
+computed
+------------------------------------
+计算属性基本思想和Vue2保持一致，组合式API下的计算属性只是修改了API写法
+
+<script setup>
+// 导入
+import {ref, computed } from 'vue'
+// 原始数据
+const count = ref(0)
+// 计算属性
+const doubleCount = computed(()=>count.value * 2)
+
+// 原始数据
+const list = ref([1,2,3,4,5,6,7,8])
+// 计算属性list
+const filterList = computed(item=>item > 2)
+</script>
+
+watch
+------------------------------------
+侦听一个或者多个数据的变化，数据变化时执行回调函数，俩个额外参数 immediate控制立刻执行，deep开启深度侦听
+
+1. 侦听单个数据
+------------------------------------
+<script setup>
+  // 1. 导入watch
+  import { ref, watch } from 'vue'
+  const count = ref(0)
+  // 2. 调用watch 侦听变化
+  watch(count, (newValue, oldValue)=>{
+    console.log(`count发生了变化，老值为${oldValue},新值为${newValue}`)
+  })
+</script>
+
+2. 侦听多个数据
+------------------------------------
+侦听多个数据，第一个参数可以改写成数组的写法
+<script setup>
+  // 1. 导入watch
+  import { ref, watch } from 'vue'
+  const count = ref(0)
+  const name = ref('cp')
+  // 2. 调用watch 侦听变化
+  watch([count, name], ([newCount, newName],[oldCount,oldName])=>{
+    console.log(`count或者name变化了，[newCount, newName],[oldCount,oldName])
+  })
+</script>
+
+3. immediate
+------------------------------------
+在侦听器创建时立即出发回调，响应式数据变化之后继续执行回调
+<script setup>
+  // 1. 导入watch
+  import { ref, watch } from 'vue'
+  const count = ref(0)
+  // 2. 调用watch 侦听变化
+  watch(count, (newValue, oldValue)=>{
+    console.log(`count发生了变化，老值为${oldValue},新值为${newValue}`)
+  },{
+    immediate: true
+  })
+</script>
+
+4. deep
+------------------------------------
+通过watch监听的ref对象默认是浅层侦听的，直接修改嵌套的对象属性不会触发回调执行，需要开启deep
+<script setup>
+  // 1. 导入watch
+  import { ref, watch } from 'vue'
+  const state = ref({ count: 0 })
+  // 2. 监听对象state
+  watch(state, ()=>{
+    console.log('数据变化了')
+  })
+  const changeStateByCount = ()=>{
+    // 直接修改不会引发回调执行
+    state.value.count++
+  }
+</script>
+
+<script setup>
+  // 1. 导入watch
+  import { ref, watch } from 'vue'
+  const state = ref({ count: 0 })
+  // 2. 监听对象state 并开启deep
+  watch(state, ()=>{
+    console.log('数据变化了')
+  },{deep:true})
+  const changeStateByCount = ()=>{
+    // 此时修改可以触发回调
+    state.value.count++
+  }
+</script>
+
+------------------------------------
+组合式API 
+------------------------------------
+
+生命周期函数基本使用
+------------------------------------
+1. 导入生命周期函数
+2. 执行生命周期函数，传入回调
+
+<scirpt setup>
+import { onMounted } from 'vue'
+onMounted(()=>{
+  // 自定义逻辑
+})
+</script>
+
+执行多次
+------------------------------------
+生命周期函数执行多次的时候，会按照顺序依次执行
+<scirpt setup>
+import { onMounted } from 'vue'
+onMounted(()=>{
+  // 自定义逻辑
+})
+
+onMounted(()=>{
+  // 自定义逻辑
+})
+</script>
+
+
+组合式API - 父子通信
+------------------------------------
+基本思想
+1. 父组件中给子组件绑定属性
+2. 子组件内部通过props选项接收数据
+
+父组件
+<scirpt setup>
+// 引入子组件
+import sonComVue from './son-com.vue'
+</script>
+<template>
+<!-- 1.绑定属性 message -->
+<sonComVue message="this is app message">
+</template>
+
+子组件
+<scirpt setup>
+// 2.通过defineProps "编译器宏" 接收子组件传递的数据
+const props = defineProps({
+	message:String
+})
+</script>
+
+<template>
+	{{message}
+</template>
+
+子传父
+------------------------------------
+基本思想
+ 1. 父组件中给子组件标签通过@绑定事件
+ 2. 子组件内部通过 emit 方法触发事件
+
+父组件
+<scirpt setup>
+// 引入子组件
+import sonComVue from './son-com.vue'
+const getMessage = (msg) =>{
+	console.log(msg)
+}
+</script>
+
+<template>
+<!-- 1.绑定自定义事件 -->
+	<sonComVue @get-message="getMessage" />
+</template>
+
+子组件
+<scirpt setup>
+// 2.通过defineProps "编译器宏" 接收子组件传递的数据
+const emit = defineEmits(['get-message'])
+
+const sendMsg = () =>{
+	// 3.触发自定义事件，并传递参数
+	emit('get-message','this is son msg')
+}
+</script>
+
+<template>
+<button @click="sendMsg">sendMsg</button>
+</template>
+
+------------------------------------
+ 模版引用
+------------------------------------
+
+1. 基本使用
+------------------------------------
+概念：通过 ref标识 获取真实的 dom对象或者组件实例对象
+
+实现步骤：
+1. 调用ref函数生成一个ref对象
+2. 通过ref标识绑定ref对象到标签
+
+<scirpt setup>
+import {ref} from 'vue'
+// 1.调用ref函数得到ref对象
+const h1Ref = ref(null)
+</script>
+
+<template>
+	<!-- 2.通过ref表示绑定ref对象 -->
+	<h1 ref= "h1Ref">我是dom标签对象h1</h1>
+</template>
+
+2. defineExpose
+------------------------------------
+默认情况下在 <script setup>语法糖下组件内部的属性和方法是不开放给父组件访问的，
+可以通过defineExpose编译宏指定哪些属性和方法容许访问
+说明：指定testMessage属性可以被访问到
+
+<scirpt setup>
+import {ref} from 'vue'
+// 1.调用ref函数得到ref对象
+const testMessage = ref('this is test msg')
+defineExpose({
+	testMessage
+})
+</script>
+
+------------------------------------
+provide和inject
+------------------------------------
+
+1. 作用和场景
+------------------------------------
+顶层组件向任意的底层组件传递数据和方法，实现跨层组件通信
+
+2. 跨层传递普通数据
+------------------------------------
+实现步骤
+
+1. 顶层组件通过 `provide` 函数提供数据
+2. 底层组件通过 `inject` 函数提供数据
+
+顶层组件
+provide('key',顶层组件中的数据)
+
+底层组件
+const message = inject('key')
+
+3. 跨层传递响应式数据
+------------------------------------
+在调用provide函数时，第二个参数设置为ref对象
+
+顶层组件
+provide('app-key',ref对象)
+
+底层组件const message = inject('app-key')
+
+4.跨层传递方法
+------------------------------------
+顶层组件可以向底层组件传递方法，底层组件调用方法修改顶层组件的数据
+
+顶层组件
+const setCount = ()=>{
+	count.value++
+}
+
+provide('setCount-key',setCount)
+
+底层组件
+const setCount = inject('setCount-key')
