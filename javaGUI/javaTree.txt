@@ -1,0 +1,84 @@
+1. 树的创建与节点操作
+	JTree(TreeNode root): 使用指定的根节点创建一个 JTree。
+	DefaultMutableTreeNode 类用于创建树的节点。
+	DefaultTreeModel: 用于操作树的模型。
+	
+2. 添加和删除节点
+	add(TreeNode newChild): 向当前节点添加一个子节点。
+	remove(int childIndex): 删除指定位置的子节点。
+	removeFromParent(): 从父节点中移除当前节点。
+	
+3. 获取节点
+	getPathForLocation(int x, int y): 根据鼠标点击的位置获取对应的节点路径。
+	getSelectionPath(): 获取当前选中的节点路径。
+	getLastSelectedPathComponent(): 获取最后一个选中的节点。
+	
+4. 选择节点
+	setSelectionPath(TreePath path): 设置选中的节点路径。
+	clearSelection(): 清除当前的选中状态。
+	
+5. 展开与折叠节点
+	expandPath(TreePath path): 展开指定路径上的节点。
+	collapsePath(TreePath path): 折叠指定路径上的节点。
+	expandRow(int row): 展开指定行。
+	collapseRow(int row): 折叠指定行。
+	
+6. 监听事件
+	addTreeSelectionListener(TreeSelectionListener listener): 添加节点选中事件监听器。
+	addTreeExpansionListener(TreeExpansionListener listener): 添加节点展开/折叠事件监听器。
+	
+7. 编辑与渲染
+	setEditable(boolean flag): 设置树是否可编辑。
+	setCellRenderer(TreeCellRenderer renderer): 设置树节点的渲染器。
+	setCellEditor(TreeCellEditor editor): 设置节点编辑器。
+	
+8. 显示树的状态
+	isExpanded(TreePath path): 判断路径上的节点是否已展开。
+	isCollapsed(TreePath path): 判断路径上的节点是否已折叠。
+	isRootVisible(): 判断根节点是否可见。
+	
+9. 获取行数
+	getRowCount(): 获取树的总行数。
+	这些方法使得 JTree 可以灵活地用于各种场景下的树形数据展示和操作。
+
+getModel() 方法用于获取树的模型 (TreeModel)。
+树模型定义了树形结构的数据，包括节点的层次关系、节点的内容、节点的子节点等。通过这个模型，您可以操作或查询树中的数据。
+
+主要用途：
+访问和操作树数据：
+	您可以通过 getModel() 获取到 TreeModel 对象，然后使用 TreeModel 提供的方法来访问或操作树的数据。例如，可以获取根节点、某个节点的子节点、删除节点或添加节点等。
+
+更新树的数据：
+	通过 getModel() 获取的 TreeModel 对象，您可以对树的数据进行动态的更新。比如向某个节点添加子节点，或删除某个节点。
+
+监听数据变化：
+	您可以向 TreeModel 添加 TreeModelListener，以便监听树的数据变化，例如节点添加、删除或更改事件。
+	
+### 监听结点事件
+
+**修改JTree的选择模式：**
+
+ JTree 专门提供了 一个 TreeSelectionModel 对象来保存该 JTree 选中状态的信息 。
+ 也就是说，JTree组件背后隐藏了两个 model 对象 ， 其中TreeModel 用于保存该 JTree 的所有节点数据 ，
+ 而TreeSelectionModel 用于保存该 JTree的所有选中状态的信息 。
+
+ 程序可以改变 JTree 的选择模式 ， 但必须先获取该 JTree 对应的 TreeSelectionMode1 对象 ，
+ 再调用该对象的 setSelectionMode(int mode);方法来设置该JTree的选择模式 ，其中model可以有如下3种取值：
+
+1. TreeSelectionModel.CONTIGUOUS_TREE_SELECTION: 可 以连续选中多个 TreePath 。
+2. TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION : 该选项对于选择没有任何限制 。
+3. TreeSelectionModel.SINGLE_TREE_SELECTION: 每次只能选择一个 TreePath 。
+
+**为JTree添加监听器:**
+
+1. addTreeExpansionListener(TreeExpansionListener tel) : 添加树节点展开/折叠事件的监听器。
+2. addTreeSelectionListener(TreeSelectionListener tsl) : 添加树节点选择事件的监听器。
+
+
+
+一些代码示例
+------------------------------
+// 展开选中子节点
+TreeNode[] pathToRoot = model.getPathToRoot(newNode);
+TreePath treePath = new TreePath(pathToRoot);
+tree.scrollPathToVisible(treePath);
