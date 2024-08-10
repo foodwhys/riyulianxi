@@ -1,0 +1,12 @@
+cn\itcast\controller\CheckCodeController.class
+cn\itcast\domain\User.class
+cn\itcast\dao\BookDao.class
+cn\itcast\dao\UserDao.class
+cn\itcast\domain\ResultInfo.class
+cn\itcast\util\StringUtils.class
+cn\itcast\controller\BookController.class
+cn\itcast\domain\Book.class
+cn\itcast\controller\UserController.class
+cn\itcast\service\UserService.class
+cn\itcast\handler\MyExceptionHandler.class
+cn\itcast\service\BookService.class

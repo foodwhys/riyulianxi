@@ -1,0 +1,4 @@
+0:0:0:0:0:0:0:1 - - [18/Jun/2020:03:09:14 +0800] "GET /user/findUsername HTTP/1.1" 200 62 http-bio-8081-exec-1 240
+0:0:0:0:0:0:0:1 - - [18/Jun/2020:03:09:14 +0800] "GET /favicon.ico HTTP/1.1" 404 949 http-bio-8081-exec-3 26
+0:0:0:0:0:0:0:1 - - [18/Jun/2020:03:10:57 +0800] "GET /user/findUsername HTTP/1.1" 200 62 http-bio-8080-exec-1 213
+0:0:0:0:0:0:0:1 - - [18/Jun/2020:03:10:57 +0800] "GET /favicon.ico HTTP/1.1" 404 949 http-bio-8080-exec-3 24
