@@ -74,6 +74,19 @@ getModel() 方法用于获取树的模型 (TreeModel)。
 1. addTreeExpansionListener(TreeExpansionListener tel) : 添加树节点展开/折叠事件的监听器。
 2. addTreeSelectionListener(TreeSelectionListener tsl) : 添加树节点选择事件的监听器。
 
+节点外观
+------------------------------
+DefaultTreeCellRenderer 提供了如下几个方法来修改节点的外观
+
+setBackgroundNonSelectionColor(Color newColor): 设置用于非选定节点的背景颜色 。
+setBackgroundSelectionColor(Color newColor): 设置节点在选中状态下的背景颜色 。
+setBorderSelectionColor(Color newColor): 设置选中状态下节点的边框颜色 。
+setClosedIcon(Icon newIcon): 设置处于折叠状态下非叶子节点的图标 。
+setFont(Font font) : 设置节点文本 的 字体。
+setLeaflcon(Icon newIcon): 设置叶子节点的图标 。
+setOpenlcon(Icon newlcon): 设置处于展开状态下非叶子节 点的图标。
+setTextNonSelectionColor(Color newColor): 设置绘制非选中状态下节点文本的颜色 。
+setTextSelectionColor(Color newColor): 设置绘制选中状态下节点文本的颜色 。
 
 
 一些代码示例
