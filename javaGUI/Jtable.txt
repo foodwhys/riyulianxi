@@ -16,7 +16,11 @@ JTable提供了一个setAutoResizeMode(int mode)方法用来调整表格的格�
 4. JTable.AUTO_RESIZE_LAST_COLUMN:只调整最后一列的宽度，其他列及表格的宽度不会发生变化；
 5. JTable.AUTO_RESIZE_ALL_COLUMNS:平均调整表格中所有列的宽度，表格的宽度不会发生改变
 
-如果需要精确控制每一列的宽度，则可通过 TableColumn 对象来实现 。 JTable 使用 TableColumn 来表示表格中的每一列， JTable 中表格列的所有属性，如最佳宽度、是否可调整宽度、最小和最大宽度等都保存在该 TableColumn 中 。 此外， TableColumn 还允许为该列指定特定的单元格绘制器和单元格编辑器(这些内容将在后面讲解) 。 TableColumn 具有如下方法 。
+如果需要精确控制每一列的宽度，则可通过 TableColumn 对象来实现 。
+ JTable 使用 TableColumn 来表示表格中的每一列，
+ JTable 中表格列的所有属性，如最佳宽度、是否可调整宽度、最小和最大宽度等都保存在该 TableColumn 中 。
+ 此外， TableColumn 还允许为该列指定特定的单元格绘制器和单元格编辑器(这些内容将在后面讲解) 。
+ TableColumn 具有如下方法 。
 
 1. setMaxWidth(int maxWidth): 设置该列的最大宽度 。 如果指定的 maxWidth 小于该列的最小宽度， 则 maxWidth 被设置成最小宽度 。    
 2. setMinWidth(int minWidth): 设置该列的最小宽度 。
