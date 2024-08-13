@@ -27,3 +27,22 @@ JTable提供了一个setAutoResizeMode(int mode)方法用来调整表格的格�
 3. setPreferredWidth(int preferredWidth): 设置该列的最佳宽度 。
 4. setResizable(boolean isResizable): 设置是否可以调整该列的 宽度 。
 5. sizeWidthToFit(): 调整该列的宽度，以适合其标题单元格的 宽度 。
+
+### TableModel和监听器
+
+与 JList、 JTree 类似的是 ， JTable 采用了 TableModel 来保存表格中的所有状态数据 : 
+与 ListModel类似的是， TableModel 也不强制保存该表格显示的数据 。 
+虽然在前面程序中看到的是直接利用 一个二维数组来创建 JTable 对象，但也可以通过 TableModel 对象来创建表格。
+
+**使用TableModel步骤：**
+
+1. 自定义类，继承AbstractTableModel抽象类，重写下面几个方法：
+
+```java
+int getColumnCount():返回表格列的数量
+int getRowCount()：返回表格行的数量
+Object getValueAt(int rowIndex, int columnIndex)：返回rowIndex行，column列的单元格的值
+String getColumnName(int columnIndex)：返回columnIndex列的列名称
+boolean isCellEditable(int rowIndex, int columnIndex)：设置rowIndex行，columnIndex列单元格是否可编辑
+setValueAt(Object aValue, int rowIndex, int columnIndex)：设置rowIndex行，columnIndex列单元格的值
+```
